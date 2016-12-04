@@ -4,9 +4,11 @@
 #include "OnlineGameMode.h"
 
 #include "OnlineGameSession.h"
+#include "OnlineCharacter.h"
 
 AOnlineGameMode::AOnlineGameMode()
 {
+	DefaultPawnClass = AOnlineCharacter::StaticClass();
 }
 
 void AOnlineGameMode::PostInitializeComponents()

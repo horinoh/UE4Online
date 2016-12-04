@@ -7,6 +7,14 @@
 #include "GameFramework/GameSession.h"
 #include "OnlineGameSession.generated.h"
 
+struct FSessionParams
+{
+	FName SessionName = NAME_None;
+	bool bIsLAN;
+	bool bIsPresence;
+	TSharedPtr<const FUniqueNetId> UserId;
+};
+
 /**
  * 
  */
@@ -17,12 +25,23 @@ class UE4ONLINE_API AOnlineGameSession : public AGameSession
 	
 public:
 	AOnlineGameSession();
+
+	//!< AGameSession
+	virtual void HandleMatchHasStarted() override { StartSession(GameSessionName); }
+	virtual void HandleMatchHasEnded() override { EndSession(GameSessionName); }
 	
 	void OnCreateSessionComplete(FName Name, bool bWasSuccessful);
 	void OnStartSessionComplete(FName Name, bool bWasSuccessful);
 	void OnFindSessionsComplete(bool bWasSuccessful);
 	void OnJoinSessionComplete(FName Name, EOnJoinSessionCompleteResult::Type Result);
 	void OnDestroySessionComplete(FName Name, bool bWasSuccessful);
+
+	bool CreateSession(TSharedPtr<const FUniqueNetId> UserId, FName Name, const FString& GameType, const FString& MapName, bool bIsLAN, bool bIsPresence, int32 MaxNumPlayers);
+	bool StartSession(FName Name);
+	void FindSessions(TSharedPtr<const FUniqueNetId> UserId, FName Name, bool bIsLAN, bool bIsPresence);
+	bool JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName Name, const FOnlineSessionSearchResult& SearchResult);
+	bool EndSession(FName Name);
+	bool DestroySession(FName Name);
 
 	DECLARE_EVENT_TwoParams(AShooterGameSession, FOnCreateSessionComplete, FName, bool);
 	FOnCreateSessionComplete CreateSessionCompleteEvent;
@@ -47,6 +66,7 @@ public:
 	FDelegateHandle JoinSessionCompleteHandle;
 	FDelegateHandle DestroySessionCompleteHandle;
 
+	FSessionParams SessionParams;
 	TSharedPtr<class FOnlineSessionSettings> OnlineSessionSettings;
 	TSharedPtr<class FOnlineSessionSearch> OnlineSessionSearch;
 };

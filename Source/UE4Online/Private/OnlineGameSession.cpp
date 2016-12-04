@@ -118,3 +118,139 @@ void AOnlineGameSession::OnDestroySessionComplete(FName Name, bool bWasSuccessfu
 
 	DestroySessionCompleteEvent.Broadcast(Name, bWasSuccessful);
 }
+
+bool AOnlineGameSession::CreateSession(TSharedPtr<const FUniqueNetId> UserId, FName Name, const FString& GameType, const FString& MapName, bool bIsLAN, bool bIsPresence, int32 MaxNumPlayers)
+{
+	const auto OnlineSub = IOnlineSubsystem::Get();
+	if (nullptr != OnlineSub)
+	{
+		SessionParams.SessionName = Name;
+		SessionParams.bIsLAN = bIsLAN;
+		SessionParams.bIsPresence = bIsPresence;
+		SessionParams.UserId = UserId;
+
+		MaxPlayers = MaxNumPlayers;
+
+		if (SessionParams.UserId.IsValid())
+		{
+			const auto Session = OnlineSub->GetSessionInterface();
+			if (Session.IsValid())
+			{
+				OnlineSessionSettings = MakeShareable(new FOnlineSessionSettings());
+				OnlineSessionSettings->Set(SETTING_GAMEMODE, GameType, EOnlineDataAdvertisementType::ViaOnlineService);
+				OnlineSessionSettings->Set(SETTING_MAPNAME, MapName, EOnlineDataAdvertisementType::ViaOnlineService);
+				OnlineSessionSettings->Set(SETTING_MATCHING_HOPPER, FString("TeamDeathmatch"), EOnlineDataAdvertisementType::DontAdvertise);
+				OnlineSessionSettings->Set(SETTING_MATCHING_TIMEOUT, 120.0f, EOnlineDataAdvertisementType::ViaOnlineService);
+				OnlineSessionSettings->Set(SETTING_SESSION_TEMPLATE_NAME, FString("GameSession"), EOnlineDataAdvertisementType::DontAdvertise);
+				OnlineSessionSettings->Set(SEARCH_KEYWORDS, FString("Custom"), EOnlineDataAdvertisementType::ViaOnlineService);
+
+				CreateSessionCompleteHandle = Session->AddOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegate);
+				return Session->CreateSession(*SessionParams.UserId, SessionParams.SessionName, *OnlineSessionSettings);
+			}
+		}
+	}
+
+	return false;
+}
+bool AOnlineGameSession::StartSession(FName Name)
+{
+	const auto OnlineSub = IOnlineSubsystem::Get();
+	if (nullptr != OnlineSub)
+	{
+		const auto Session = OnlineSub->GetSessionInterface();
+		if (Session.IsValid())
+		{
+			StartSessionCompleteHandle = Session->AddOnStartSessionCompleteDelegate_Handle(OnStartSessionCompleteDelegate);
+			return Session->StartSession(Name);
+		}
+	}
+
+	return false;
+}
+void AOnlineGameSession::FindSessions(TSharedPtr<const FUniqueNetId> UserId, FName Name, bool bIsLAN, bool bIsPresence)
+{
+	const auto OnlineSub = IOnlineSubsystem::Get();
+	if (nullptr != OnlineSub)
+	{
+		SessionParams.SessionName = Name;
+		SessionParams.bIsLAN = bIsLAN;
+		SessionParams.bIsPresence = bIsPresence;
+		SessionParams.UserId = UserId;
+
+		if (SessionParams.UserId.IsValid())
+		{
+			const auto Session = OnlineSub->GetSessionInterface();
+			if (Session.IsValid())
+			{
+				OnlineSessionSearch = MakeShareable(new FOnlineSessionSearch());
+				OnlineSessionSearch->QuerySettings.Set(SEARCH_KEYWORDS, FString("Custom"), EOnlineComparisonOp::Equals);
+
+				auto OnlineSessionSearchRef = OnlineSessionSearch.ToSharedRef();
+
+				FindSessionsCompleteHandle = Session->AddOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegate);
+				Session->FindSessions(*SessionParams.UserId, OnlineSessionSearchRef);
+			}
+		}
+	}
+	else
+	{
+		OnFindSessionsComplete(false);
+	}
+}
+bool AOnlineGameSession::JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName Name, const FOnlineSessionSearchResult& SearchResult)
+{
+	const auto OnlineSub = IOnlineSubsystem::Get();
+	if (nullptr != OnlineSub)
+	{
+		if (UserId.IsValid())
+		{
+			const auto Session = OnlineSub->GetSessionInterface();
+			if (Session.IsValid())
+			{
+				JoinSessionCompleteHandle = Session->AddOnJoinSessionCompleteDelegate_Handle(OnJoinSessionCompleteDelegate);
+				return Session->JoinSession(*UserId, Name, SearchResult);
+			}
+		}
+	}
+	return false;
+}
+bool AOnlineGameSession::EndSession(FName Name)
+{
+	const auto OnlineSub = IOnlineSubsystem::Get();
+	if (nullptr != OnlineSub)
+	{
+		const auto Session = OnlineSub->GetSessionInterface();
+		if (Session.IsValid())
+		{
+			const auto World = GetWorld();
+			if (nullptr != World)
+			{
+				for (auto It = World->GetPlayerControllerIterator(); It; ++It)
+				{
+					//!< #MY_TODO
+					//if(It->IsLocal)
+					//It->ClientEndOnlineGame();
+				}
+			}
+			return Session->EndSession(Name);
+		}
+	}
+
+	return false;
+}
+bool AOnlineGameSession::DestroySession(FName Name)
+{
+	const auto OnlineSub = IOnlineSubsystem::Get();
+	if (nullptr != OnlineSub)
+	{
+		const auto Session = OnlineSub->GetSessionInterface();
+		if (Session.IsValid())
+		{
+			DestroySessionCompleteHandle = Session->AddOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegate);
+			return Session->DestroySession(Name);
+		}
+	}
+
+	return false;
+}
+
