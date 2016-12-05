@@ -13,6 +13,13 @@
 * Axis Mapping
     * MoveForward, MoveRight, Turn, Lookup を追加
 
+##
+
+Project Settings - Map & Modes - Default GameMode, GameInstance Class を指定
+
+<!--
+Project Settings - General Settings - Game Viewport Client Class, を指定
+-->
 
 ## その他
 

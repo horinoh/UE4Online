@@ -34,10 +34,15 @@ public:
 	bool JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult);
 	bool DestroySession();
 
+
+	virtual bool StartPIEGameInstance(ULocalPlayer* LocalPlayer, bool bInSimulateInEditor, bool bAnyBlueprintErrors, bool bStartInSpectatorMode) override;
+
 protected:
 	FDelegateHandle OnCreateSessionCompleteDelegateHandle;
 	FDelegateHandle OnStartSessionCompleteDelegateHandle;
 	FDelegateHandle OnFindSessionsCompleteDelegateHandle;
 	FDelegateHandle OnJoinSessionCompleteDelegateHandle;
 	FDelegateHandle OnDestroySessionCompleteDelegateHandle;
+
+	TSharedPtr<class FOnlineMainMenu> MainMenu;
 };

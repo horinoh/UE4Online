@@ -4,6 +4,7 @@
 #include "OnlineGameInstance.h"
 
 #include "OnlineGameSession.h"
+#include "OnlineMainMenu.h"
 
 void UOnlineGameInstance::Init()
 {
@@ -305,4 +306,18 @@ bool UOnlineGameInstance::DestroySession()
 	}
 
 	return false;
+}
+
+//!< #MY_TODO UIのテスト用にオーバライドあとで消す
+bool UOnlineGameInstance::StartPIEGameInstance(ULocalPlayer* LocalPlayer, bool bInSimulateInEditor, bool bAnyBlueprintErrors, bool bStartInSpectatorMode)
+{
+	MainMenu = MakeShareable(new FOnlineMainMenu());
+	MainMenu->Construct(this, GetFirstGamePlayer());
+
+	if (nullptr != GEngine && nullptr != GEngine->GameViewport)
+	{
+		GEngine->GameViewport->AddViewportWidgetContent(MainMenu->MenuWidgetContainer.ToSharedRef());
+	}
+
+	return Super::StartPIEGameInstance(LocalPlayer, bInSimulateInEditor, bAnyBlueprintErrors, bStartInSpectatorMode);
 }
