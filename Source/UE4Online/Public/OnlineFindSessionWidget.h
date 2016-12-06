@@ -5,10 +5,10 @@
 /**
  * 
  */
-class UE4ONLINE_API SOnlineMenuWidget : public SCompoundWidget
+class UE4ONLINE_API SOnlineFindSessionWidget : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SOnlineMenuWidget)
+	SLATE_BEGIN_ARGS(SOnlineFindSessionWidget)
 		: _LocalPlayer()
 	{}
 	SLATE_ARGUMENT(TWeakObjectPtr<ULocalPlayer>, LocalPlayer)
@@ -16,10 +16,14 @@ public:
 
 	void Construct(const FArguments& InArgs);
 
-	FReply OnCreateSessionButtonClicked();
-	FReply OnJoinSessionButtonClicked();
-	FReply OnQuitButtonClicked();
+	ECheckBoxState IsLanCheckBoxChecked() const;
+	void OnIsLanCheckBoxStateChanged(ECheckBoxState CheckBoxState);
+
+	FReply OnOKButtonClicked();
+	FReply OnCancelButtonClicked();
 
 protected:
 	TWeakObjectPtr<ULocalPlayer> LocalPlayer;
+
+	bool bIsLanCheckBoxState;
 };

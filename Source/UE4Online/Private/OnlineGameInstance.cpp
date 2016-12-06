@@ -317,6 +317,9 @@ bool UOnlineGameInstance::StartPIEGameInstance(ULocalPlayer* LocalPlayer, bool b
 	if (nullptr != GEngine && nullptr != GEngine->GameViewport)
 	{
 		GEngine->GameViewport->AddViewportWidgetContent(MainMenu->MenuWidgetContainer.ToSharedRef());
+		//GEngine->GameViewport->AddViewportWidgetContent(MainMenu->CreateSessionWidgetContainer.ToSharedRef());
+		//GEngine->GameViewport->AddViewportWidgetContent(MainMenu->FindSessionWidgetContainer.ToSharedRef());
+		//GEngine->GameViewport->AddViewportWidgetContent(MainMenu->JoinSessionWidgetContainer.ToSharedRef());
 	}
 
 	return Super::StartPIEGameInstance(LocalPlayer, bInSimulateInEditor, bAnyBlueprintErrors, bStartInSpectatorMode);

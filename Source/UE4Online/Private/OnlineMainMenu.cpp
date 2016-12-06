@@ -4,6 +4,9 @@
 #include "OnlineMainMenu.h"
 
 #include "OnlineMenuWidget.h"
+#include "OnlineCreateSessionWidget.h"
+#include "OnlineFindSessionWidget.h"
+#include "OnlineJoinSessionWidget.h"
 
 void FOnlineMainMenu::Tick(float DeltaTime)
 {
@@ -22,8 +25,25 @@ void FOnlineMainMenu::Construct(TWeakObjectPtr<class UOnlineGameInstance> GI, TW
 		SAssignNew(MenuWidget, SOnlineMenuWidget)
 			.Cursor(EMouseCursor::Default)
 			.LocalPlayer(LocalPlayer.Get());
-
 		SAssignNew(MenuWidgetContainer, SWeakWidget)
 			.PossiblyNullContent(MenuWidget);
+
+		SAssignNew(CreateSessionWidget, SOnlineCreateSessionWidget)
+			.Cursor(EMouseCursor::Default)
+			.LocalPlayer(LocalPlayer.Get());
+		SAssignNew(CreateSessionWidgetContainer, SWeakWidget)
+			.PossiblyNullContent(CreateSessionWidget);
+
+		SAssignNew(FindSessionWidget, SOnlineFindSessionWidget)
+			.Cursor(EMouseCursor::Default)
+			.LocalPlayer(LocalPlayer.Get());
+		SAssignNew(FindSessionWidgetContainer, SWeakWidget)
+			.PossiblyNullContent(FindSessionWidget);
+
+		SAssignNew(JoinSessionWidget, SOnlineJoinSessionWidget)
+			.Cursor(EMouseCursor::Default)
+			.LocalPlayer(LocalPlayer.Get());
+		SAssignNew(JoinSessionWidgetContainer, SWeakWidget)
+			.PossiblyNullContent(JoinSessionWidget);
 	}
 }

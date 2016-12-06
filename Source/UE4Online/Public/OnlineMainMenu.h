@@ -22,4 +22,13 @@ protected:
 public:
 	TSharedPtr<class SOnlineMenuWidget> MenuWidget;
 	TSharedPtr<class SWeakWidget> MenuWidgetContainer;
+
+	TSharedPtr<class SOnlineCreateSessionWidget> CreateSessionWidget;
+	TSharedPtr<class SWeakWidget> CreateSessionWidgetContainer;
+
+	TSharedPtr<class SOnlineFindSessionWidget> FindSessionWidget;
+	TSharedPtr<class SWeakWidget> FindSessionWidgetContainer;
+
+	TSharedPtr<class SOnlineJoinSessionWidget> JoinSessionWidget;
+	TSharedPtr<class SWeakWidget> JoinSessionWidgetContainer;
 };
