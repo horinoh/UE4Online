@@ -3,12 +3,52 @@
 #include "UE4Online.h"
 #include "OnlineJoinSessionWidget.h"
 
+#include "SThrobber.h"
+
+#include "OnlineGameSession.h"
+
 #define LOCTEXT_NAMESPACE "JoinSessionWidget"
 
 void SOnlineJoinSessionWidget::Construct(const FArguments& InArgs)
 {
 	LocalPlayer = InArgs._LocalPlayer;
 
+	{
+		const auto GameInst = LocalPlayer->GetGameInstance();
+		if (nullptr != GameInst)
+		{
+			const auto World = GameInst->GetWorld();
+			if (nullptr != World)
+			{
+				const auto GameMode = World->GetAuthGameMode();
+				if (nullptr != GameMode)
+				{
+					const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
+					if (nullptr != Session)
+					{
+						ServerList.Empty();
+
+						const auto SessionSearch = Session->OnlineSessionSearch;
+						if (SessionSearch->SearchResults.Num())
+						{
+							SessionSearch->SearchResults;
+							for (auto i : SessionSearch->SearchResults)
+							{
+								auto ServerEntry = MakeShareable(new FServerEntry({ "ABCDE", 123 }));
+								
+								//ServerEntry.ServerName = "ABCDEFG";
+								//ServerEntry.Dummy = 4096;
+
+								ServerList.Add(ServerEntry);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	//!< #MY_TODO テスト
 	ServerList.Add(MakeShareable(new FServerEntry({ "AAA", 000 })));
 	ServerList.Add(MakeShareable(new FServerEntry({ "BBB", 111 })));
 	ServerList.Add(MakeShareable(new FServerEntry({ "CCC", 222 })));
@@ -49,11 +89,28 @@ void SOnlineJoinSessionWidget::Construct(const FArguments& InArgs)
 			ServerListView
 		];
 
-	ChildSlot
-		.VAlign(VAlign_Fill)
-		.HAlign(HAlign_Fill)
+	//!< ローディング中
+	const auto CircularThrobber = SNew(SCircularThrobber);
+	//CircularThrobber->SetVisibility(EVisibility::Hidden);
+	CircularThrobber->SetVisibility(EVisibility::Visible);
+
+	const auto Overlay = SNew(SOverlay);
+	Overlay->AddSlot()
 		[
 			VBox
+		];
+	Overlay->AddSlot()
+		.HAlign(HAlign_Center)
+		.VAlign(VAlign_Center)
+		[
+			CircularThrobber
+		];
+
+	ChildSlot
+		.HAlign(HAlign_Center)
+		.HAlign(HAlign_Center)
+		[
+			Overlay
 		];
 }
 
@@ -76,7 +133,7 @@ TSharedRef<ITableRow> SOnlineJoinSessionWidget::OnServerEntryGenerateRow(TShared
 			auto ItemText = FText::GetEmpty();
 			if (ColumnName == "Name")
 			{
-				ItemText = FText::FromString(Item->Name);
+				ItemText = FText::FromString(Item->ServerName);
 			}
 			else if (ColumnName == "Dummy")
 			{

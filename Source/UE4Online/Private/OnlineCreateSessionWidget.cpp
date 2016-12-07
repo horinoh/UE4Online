@@ -119,8 +119,8 @@ void SOnlineCreateSessionWidget::Construct(const FArguments& InArgs)
 		];
 
 	ChildSlot
-		.VAlign(VAlign_Fill)
-		.HAlign(HAlign_Fill)
+		.VAlign(VAlign_Center)
+		.HAlign(HAlign_Center)
 		[
 			VBox
 		];

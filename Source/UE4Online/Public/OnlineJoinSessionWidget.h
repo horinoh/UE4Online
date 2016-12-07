@@ -18,7 +18,7 @@ public:
 
 	struct FServerEntry
 	{
-		FString Name;
+		FString ServerName;
 		int32 Dummy;
 	};
 	TSharedRef<ITableRow> OnServerEntryGenerateRow(TSharedPtr<FServerEntry> Item, const TSharedRef<STableViewBase>& OwnerTable);
