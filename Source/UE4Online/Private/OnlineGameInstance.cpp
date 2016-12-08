@@ -13,7 +13,46 @@ void UOnlineGameInstance::Init()
 	//!< セッション終了時のコールバック
 	//OnEndSessionCompleteDelegate = FOnEndSessionCompleteDelegate::CreateUObject(this, &UOnlineGameInstance::OnEndSessionComplete);
 }
+bool UOnlineGameInstance::JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults)
+{
+	const auto World = GetWorld();
+	if (nullptr != World)
+	{
+		const auto GameMode = World->GetAuthGameMode();
+		const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
+		if (nullptr != Session)
+		{
+			OnJoinSessionCompleteDelegateHandle = Session->JoinSessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnJoinSessionComplete);
+			if (Session->JoinSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, SessionIndexInSearchResults))
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("JoinSession"));
+				return true;
+			}
+		}
+	}
 
+	return false;
+}
+bool UOnlineGameInstance::JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult)
+{
+	const auto World = GetWorld();
+	if (nullptr != World)
+	{
+		const auto GameMode = World->GetAuthGameMode();
+		const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
+		if (nullptr != Session)
+		{
+			OnJoinSessionCompleteDelegateHandle = Session->JoinSessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnJoinSessionComplete);
+			if (Session->JoinSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, SearchResult))
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("JoinSession"));
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
 void UOnlineGameInstance::OnCreateSessionComplete(FName Name, bool bWasSuccessful)
 {
 	const auto World = GetWorld();
@@ -262,26 +301,7 @@ bool UOnlineGameInstance::FindSessions(ULocalPlayer* PlayerOwner, bool bIsLAN)
 
 	return false;
 }
-bool UOnlineGameInstance::JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult)
-{
-	const auto World = GetWorld();
-	if (nullptr != World)
-	{
-		const auto GameMode = World->GetAuthGameMode();
-		const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
-		if (nullptr != Session)
-		{
-			OnJoinSessionCompleteDelegateHandle = Session->JoinSessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnJoinSessionComplete);
-			if (Session->JoinSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, SearchResult))
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("JoinSession"));
-				return true;
-			}
-		}
-	}
 
-	return false;
-}
 bool UOnlineGameInstance::DestroySession()
 {
 	const auto World = GetWorld();
@@ -324,3 +344,5 @@ bool UOnlineGameInstance::StartPIEGameInstance(ULocalPlayer* LocalPlayer, bool b
 
 	return Super::StartPIEGameInstance(LocalPlayer, bInSimulateInEditor, bAnyBlueprintErrors, bStartInSpectatorMode);
 }
+
+

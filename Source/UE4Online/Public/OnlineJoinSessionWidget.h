@@ -19,11 +19,16 @@ public:
 	struct FServerEntry
 	{
 		FString ServerName;
-		int32 Dummy;
+		FString CurrentPlayerCount;
+		FString MaxPlayerCount;
+		FString PingInMs;
+		int32 Index;
 	};
 	TSharedRef<ITableRow> OnServerEntryGenerateRow(TSharedPtr<FServerEntry> Item, const TSharedRef<STableViewBase>& OwnerTable);
-	void OnServerEntrySelectionChanged(TSharedPtr<FServerEntry> InItem, ESelectInfo::Type SelectInfo);
+	//void OnServerEntrySelectionChanged(TSharedPtr<FServerEntry> InItem, ESelectInfo::Type SelectInfo) {}
 	void OnServerEntryMouseButtonDoubleClicked(TSharedPtr<FServerEntry> InItem);
+
+	void UpdateSearchStatus();
 
 protected:
 	TWeakObjectPtr<ULocalPlayer> LocalPlayer;

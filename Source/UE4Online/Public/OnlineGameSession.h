@@ -39,6 +39,7 @@ public:
 	bool CreateSession(TSharedPtr<const FUniqueNetId> UserId, FName Name, const FString& GameType, const FString& MapName, bool bIsLAN, bool bIsPresence, int32 MaxNumPlayers);
 	bool StartSession(FName Name);
 	void FindSessions(TSharedPtr<const FUniqueNetId> UserId, FName Name, bool bIsLAN, bool bIsPresence);
+	bool JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName Name, int32 SessionIndexInSearchResults);
 	bool JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName Name, const FOnlineSessionSearchResult& SearchResult);
 	bool EndSession(FName Name);
 	bool DestroySession(FName Name);

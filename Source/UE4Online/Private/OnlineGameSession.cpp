@@ -197,6 +197,14 @@ void AOnlineGameSession::FindSessions(TSharedPtr<const FUniqueNetId> UserId, FNa
 		OnFindSessionsComplete(false);
 	}
 }
+bool AOnlineGameSession::JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName Name, int32 SessionIndexInSearchResults)
+{
+	if (0 < SessionIndexInSearchResults && SessionIndexInSearchResults < OnlineSessionSearch->SearchResults.Num())
+	{
+		JoinSession(UserId, Name, OnlineSessionSearch->SearchResults[SessionIndexInSearchResults]);
+	}
+	return false;
+}
 bool AOnlineGameSession::JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName Name, const FOnlineSessionSearchResult& SearchResult)
 {
 	const auto OnlineSub = IOnlineSubsystem::Get();
@@ -214,6 +222,7 @@ bool AOnlineGameSession::JoinSession(TSharedPtr<const FUniqueNetId> UserId, FNam
 	}
 	return false;
 }
+
 bool AOnlineGameSession::EndSession(FName Name)
 {
 	const auto OnlineSub = IOnlineSubsystem::Get();

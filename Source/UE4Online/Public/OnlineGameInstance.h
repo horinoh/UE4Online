@@ -18,6 +18,8 @@ class UE4ONLINE_API UOnlineGameInstance : public UGameInstance
 public:
 	//!< UGameInstance
 	virtual void Init() override;
+	virtual bool JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults) override;
+	virtual bool JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult) override;
 
 	void OnCreateSessionComplete(FName Name, bool bWasSuccessful);
 	void OnStartSessionComplete(FName Name, bool bWasSuccessful);
@@ -31,9 +33,7 @@ public:
 	bool CreateSession(ULocalPlayer* LocalPlayer, const FString& GameType, const FString& MapName, bool bIsLAN);
 	bool StartSession();
 	bool FindSessions(ULocalPlayer* PlayerOwner, bool bIsLAN);
-	bool JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult);
 	bool DestroySession();
-
 
 	virtual bool StartPIEGameInstance(ULocalPlayer* LocalPlayer, bool bInSimulateInEditor, bool bAnyBlueprintErrors, bool bStartInSpectatorMode) override;
 
