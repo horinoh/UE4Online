@@ -14,6 +14,9 @@ public:
 	SLATE_ARGUMENT(TWeakObjectPtr<ULocalPlayer>, LocalPlayer)
 	SLATE_END_ARGS()
 
+	//!< SWidget
+	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
+
 	void Construct(const FArguments& InArgs);
 
 	struct FServerEntry
@@ -27,6 +30,7 @@ public:
 	TSharedRef<ITableRow> OnServerEntryGenerateRow(TSharedPtr<FServerEntry> Item, const TSharedRef<STableViewBase>& OwnerTable);
 	//void OnServerEntrySelectionChanged(TSharedPtr<FServerEntry> InItem, ESelectInfo::Type SelectInfo) {}
 	void OnServerEntryMouseButtonDoubleClicked(TSharedPtr<FServerEntry> InItem);
+	FReply OnCancelButtonClicked();
 
 	void UpdateSearchStatus();
 

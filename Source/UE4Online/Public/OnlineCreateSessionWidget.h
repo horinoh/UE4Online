@@ -33,7 +33,7 @@ public:
 protected:
 	TWeakObjectPtr<ULocalPlayer> LocalPlayer;
 
-	FString ServerName;
-	uint8 PlayerCount;
+	FString ServerName = "--------";
+	uint8 PlayerCount = 1;
 	bool bIsLanCheckBoxState;
 };

@@ -17,7 +17,7 @@ public:
 	void Construct(const FArguments& InArgs);
 
 	FReply OnCreateSessionButtonClicked();
-	FReply OnJoinSessionButtonClicked();
+	FReply OnFindSessionButtonClicked();
 	FReply OnQuitButtonClicked();
 
 protected:

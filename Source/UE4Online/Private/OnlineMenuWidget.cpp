@@ -3,6 +3,9 @@
 #include "UE4Online.h"
 #include "OnlineMenuWidget.h"
 
+#include "OnlineGameInstance.h"
+#include "OnlineMainMenu.h"
+
 #define LOCTEXT_NAMESPACE "MenuWidget"
 
 void SOnlineMenuWidget::Construct(const FArguments& InArgs)
@@ -15,16 +18,19 @@ void SOnlineMenuWidget::Construct(const FArguments& InArgs)
 		//.Font(FEditorStyle::GetFontStyle(FName("ToolBarButton.LabelFont")))
 		.ToolTipText(LOCTEXT("MAIN_TITLE_TIP_Key", "Main Menu"));
 
+	//!< セッション作成
 	const auto CreateButton = SNew(SButton)
 		.Text(LOCTEXT("CREATE_SESSION_Key", "Create Session"))
 		.ToolTipText(LOCTEXT("CREATE_SESSION_TIP_Key", "Create Session"))
 		.OnClicked(this, &SOnlineMenuWidget::OnCreateSessionButtonClicked);
 
+	//!< セッション検索
 	const auto FindButton = SNew(SButton)
 		.Text(LOCTEXT("FIND_SESSION_Key", "Find Session"))
 		.ToolTipText(LOCTEXT("FIND_SESSION_TIP_Key", "Find Session"))
-		.OnClicked(this, &SOnlineMenuWidget::OnJoinSessionButtonClicked);
+		.OnClicked(this, &SOnlineMenuWidget::OnFindSessionButtonClicked);
 
+	//!< 終了
 	const auto QuitButton = SNew(SButton)
 		.Text(LOCTEXT("QUIT_Key", "Quit"))
 		.ToolTipText(LOCTEXT("QUIT_TIP_Key", "Quit"))
@@ -33,7 +39,7 @@ void SOnlineMenuWidget::Construct(const FArguments& InArgs)
 	const auto VBox = SNew(SVerticalBox) + SVerticalBox::Slot();
 	VBox->AddSlot()
 		.HAlign(HAlign_Center)
-		.VAlign(VAlign_Center)
+		.VAlign(VAlign_Top)
 		[
 			TitleTextBlock
 		];
@@ -51,33 +57,68 @@ void SOnlineMenuWidget::Construct(const FArguments& InArgs)
 		];
 	VBox->AddSlot()
 		.HAlign(HAlign_Center)
-		.VAlign(VAlign_Center)
+		.VAlign(VAlign_Bottom)
 		[
 			QuitButton
 		];
 
 	ChildSlot
-		.VAlign(VAlign_Fill)
-		.HAlign(HAlign_Fill)
+		.HAlign(HAlign_Center)
+		.VAlign(VAlign_Center)
 		[
-			VBox
+			SNew(SVerticalBox) + SVerticalBox::Slot()
+			.AutoHeight()
+			[
+				SNew(SBox)
+					.WidthOverride(300)
+					.HeightOverride(300)
+					[
+						VBox
+					]
+			]
 		];
 }
 
 FReply SOnlineMenuWidget::OnCreateSessionButtonClicked()
 {
-	//!< #MY_TODO
+	const auto GameInst = Cast<UOnlineGameInstance>(LocalPlayer->GetGameInstance());
+	if (nullptr != GameInst)
+	{
+		if (nullptr != GEngine && nullptr != GEngine->GameViewport)
+		{
+			const auto MainMenu = GameInst->GetMainMenu();
+			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->MenuWidgetContainer.ToSharedRef());
+			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->CreateSessionWidgetContainer.ToSharedRef());
+		}
+	}
+
 	return FReply::Handled();
 }
-FReply SOnlineMenuWidget::OnJoinSessionButtonClicked()
+FReply SOnlineMenuWidget::OnFindSessionButtonClicked()
 {
-	//!< #MY_TODO
+	const auto GameInst = Cast<UOnlineGameInstance>(LocalPlayer->GetGameInstance());
+	if (nullptr != GameInst)
+	{
+		if (nullptr != GEngine && nullptr != GEngine->GameViewport)
+		{
+			const auto MainMenu = GameInst->GetMainMenu();
+			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->MenuWidgetContainer.ToSharedRef());
+			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->FindSessionWidgetContainer.ToSharedRef());
+		}
+	}
+
 	return FReply::Handled();
 }
 FReply SOnlineMenuWidget::OnQuitButtonClicked()
 {
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->RemoveAllViewportWidgets();
+	}
+
 	//!< #MY_TODO
-	//	LocalPlayer->GetGameInstance()->GetGameViewportClient()->ConsoleCommand("quit");
+	LocalPlayer->GetGameInstance()->GetGameViewportClient()->ConsoleCommand("quit");
+
 	return FReply::Handled();
 }
 

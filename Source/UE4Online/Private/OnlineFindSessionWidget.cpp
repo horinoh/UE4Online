@@ -3,6 +3,9 @@
 #include "UE4Online.h"
 #include "OnlineFindSessionWidget.h"
 
+#include "OnlineGameInstance.h"
+#include "OnlineMainMenu.h"
+
 #define LOCTEXT_NAMESPACE "FindSessionWidget"
 
 void SOnlineFindSessionWidget::Construct(const FArguments& InArgs)
@@ -14,7 +17,7 @@ void SOnlineFindSessionWidget::Construct(const FArguments& InArgs)
 		.Text(LOCTEXT("FIND_SESSION_TITLE_Key", "Find Session Menu"))
 		.ToolTipText(LOCTEXT("FIND_SESSION_TITLE_TIP_Key", "Find Session Menu"));
 
-	//!< IsLAN
+	//!< LAN or インターネット
 	const auto IsLanCheckBox = SNew(SCheckBox)
 		.IsChecked(this, &SOnlineFindSessionWidget::IsLanCheckBoxChecked)
 		.OnCheckStateChanged(this, &SOnlineFindSessionWidget::OnIsLanCheckBoxStateChanged)
@@ -36,13 +39,13 @@ void SOnlineFindSessionWidget::Construct(const FArguments& InArgs)
 	const auto OKCancelHBox = SNew(SHorizontalBox) + SHorizontalBox::Slot();
 	OKCancelHBox->AddSlot()
 		.HAlign(HAlign_Left)
-		.VAlign(VAlign_Center)
+		.AutoWidth()
 		[
 			CancelButton
 		];
 	OKCancelHBox->AddSlot()
 		.HAlign(HAlign_Right)
-		.VAlign(VAlign_Center)
+		.AutoWidth()
 		[
 			OKButton
 		];
@@ -50,7 +53,7 @@ void SOnlineFindSessionWidget::Construct(const FArguments& InArgs)
 	const auto VBox = SNew(SVerticalBox) + SVerticalBox::Slot();
 	VBox->AddSlot()
 		.HAlign(HAlign_Center)
-		.VAlign(VAlign_Center)
+		.VAlign(VAlign_Top)
 		[
 			TitleTextBlock
 		];
@@ -62,16 +65,26 @@ void SOnlineFindSessionWidget::Construct(const FArguments& InArgs)
 		];
 	VBox->AddSlot()
 		.HAlign(HAlign_Center)
-		.VAlign(VAlign_Center)
+		.VAlign(VAlign_Bottom)
 		[
 			OKCancelHBox
 		];
 
 	ChildSlot
-		.VAlign(VAlign_Fill)
-		.HAlign(HAlign_Fill)
+		.HAlign(HAlign_Center)
+		.VAlign(VAlign_Center)
 		[
-			VBox
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			[
+				SNew(SBox)
+					.WidthOverride(300)
+					.HeightOverride(300)
+					[
+						VBox
+					]
+			]
 		];
 }
 
@@ -86,12 +99,35 @@ void SOnlineFindSessionWidget::OnIsLanCheckBoxStateChanged(ECheckBoxState CheckB
 
 FReply SOnlineFindSessionWidget::OnOKButtonClicked()
 {
-	//!< #MY_TODO
+	const auto GameInst = Cast<UOnlineGameInstance>(LocalPlayer->GetGameInstance());
+	if (nullptr != GameInst)
+	{
+		if (nullptr != GEngine && nullptr != GEngine->GameViewport)
+		{
+			const auto MainMenu = GameInst->GetMainMenu();
+			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->FindSessionWidgetContainer.ToSharedRef());
+			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->JoinSessionWidgetContainer.ToSharedRef());
+		}
+
+		//!< セッション検索開始
+		GameInst->FindSessions(LocalPlayer.Get(), bIsLanCheckBoxState);
+	}
+
 	return FReply::Handled();
 }
 FReply SOnlineFindSessionWidget::OnCancelButtonClicked()
 {
-	//!< #MY_TODO
+	const auto GameInst = Cast<UOnlineGameInstance>(LocalPlayer->GetGameInstance());
+	if (nullptr != GameInst)
+	{
+		if (nullptr != GEngine && nullptr != GEngine->GameViewport)
+		{
+			const auto MainMenu = GameInst->GetMainMenu();
+			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->FindSessionWidgetContainer.ToSharedRef());
+			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->MenuWidgetContainer.ToSharedRef());
+		}
+	}
+
 	return FReply::Handled();
 }
 

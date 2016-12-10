@@ -17,8 +17,13 @@ public:
 	AOnlineGameMode();
 	
 	//!< AActor
+	virtual void PreInitializeComponents() override;
 	virtual void PostInitializeComponents() override;
 
 	//!< AGameModeBase
 	virtual TSubclassOf<AGameSession> GetGameSessionClass() const override;
+
+	virtual void DefaultTimer();
+
+protected:
 };

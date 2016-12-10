@@ -6,8 +6,41 @@
 #include "SThrobber.h"
 
 #include "OnlineGameSession.h"
+#include "OnlineGameInstance.h"
+#include "OnlineMainMenu.h"
 
 #define LOCTEXT_NAMESPACE "JoinSessionWidget"
+
+void SOnlineJoinSessionWidget::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+{
+	SCompoundWidget::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
+
+	const auto GameInst = LocalPlayer->GetGameInstance();
+	if (nullptr != GameInst)
+	{
+		const auto World = GameInst->GetWorld();
+		if (nullptr != World)
+		{
+			const auto GameMode = World->GetAuthGameMode();
+			if (nullptr != GameMode)
+			{
+				const auto GameSession = Cast<AOnlineGameSession>(GameMode->GameSession);
+				if (nullptr != GameSession)
+				{
+					//GameSession->GetSearchResultStatus();
+
+					//switch (SearchState)
+					//{
+					//case EOnlineAsyncTaskState::InProgress:
+					//	break;
+					//case EOnlineAsyncTaskState::Done:
+					//	break;
+					//}
+				}
+			}
+		}
+	}	
+}
 
 void SOnlineJoinSessionWidget::Construct(const FArguments& InArgs)
 {
@@ -21,6 +54,11 @@ void SOnlineJoinSessionWidget::Construct(const FArguments& InArgs)
 	ServerList.Add(MakeShareable(new FServerEntry({ "DDD", "0", "32", "35" })));
 	ServerList.Add(MakeShareable(new FServerEntry({ "EEE", "7", "16", "47" })));
 	ServerList.Add(MakeShareable(new FServerEntry({ "FFF", "4", "256", "1" })));
+	ServerList.Add(MakeShareable(new FServerEntry({ "GGG", "3", "12", "2" })));
+	ServerList.Add(MakeShareable(new FServerEntry({ "HHH", "7", "64", "9" })));
+	ServerList.Add(MakeShareable(new FServerEntry({ "III", "2", "32", "10" })));
+	ServerList.Add(MakeShareable(new FServerEntry({ "JJJ", "1", "16", "44" })));
+	ServerList.Add(MakeShareable(new FServerEntry({ "KKK", "3", "48", "78" })));
 #endif
 
 	//!< タイトル
@@ -39,16 +77,22 @@ void SOnlineJoinSessionWidget::Construct(const FArguments& InArgs)
 		.HeaderRow(
 			SNew(SHeaderRow)
 			+ SHeaderRow::Column("ServerName").FixedWidth(100).DefaultLabel(LOCTEXT("ServerNameColumn", "Server Name"))
-			//+ SHeaderRow::Column("GameType").DefaultLabel(LOCTEXT("GameTypeColumn", "Game Type"))
-			//+ SHeaderRow::Column("Map").DefaultLabel(LOCTEXT("MapColumn", "Map"))
+			+ SHeaderRow::Column("GameType").DefaultLabel(LOCTEXT("GameTypeColumn", "Game Type"))
+			+ SHeaderRow::Column("Map").DefaultLabel(LOCTEXT("MapColumn", "Map"))
 			+ SHeaderRow::Column("PlayerCount").DefaultLabel(LOCTEXT("PlayerCountColumn", "Player Count"))
 			+ SHeaderRow::Column("PingInMs").DefaultLabel(LOCTEXT("PingInMsColumn", "PingInMs"))
 		);
 
-	//!< ローディング中表示
+	//!< 円形スロバー
 	const auto CircularThrobber = SNew(SCircularThrobber);
 	//CircularThrobber->SetVisibility(EVisibility::Hidden);
 	CircularThrobber->SetVisibility(EVisibility::Visible);
+
+	//!< Cancel
+	const auto CancelButton = SNew(SButton)
+		.Text(LOCTEXT("CANCEL_Key", "Cancel"))
+		.ToolTipText(LOCTEXT("CANCEL_TIP_Key", "Cancel"))
+		.OnClicked(this, &SOnlineJoinSessionWidget::OnCancelButtonClicked);
 
 	//!< リストビューとローディング中は重ねて表示するので SOverlay へ含める
 	const auto Overlay = SNew(SOverlay);
@@ -74,17 +118,22 @@ void SOnlineJoinSessionWidget::Construct(const FArguments& InArgs)
 		];
 	VBox->AddSlot()
 		.HAlign(HAlign_Center)
-		.VAlign(VAlign_Bottom)
+		.VAlign(VAlign_Center)
 		[
 			Overlay
+		];
+	VBox->AddSlot()
+		.HAlign(HAlign_Center)
+		.VAlign(VAlign_Bottom)
+		[
+			CancelButton
 		];
 
 	ChildSlot
 		.HAlign(HAlign_Center)
 		.VAlign(VAlign_Center)
 		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
+			SNew(SVerticalBox) + SVerticalBox::Slot()
 			.AutoHeight()
 			[
 				SNew(SBox)
@@ -118,12 +167,14 @@ TSharedRef<ITableRow> SOnlineJoinSessionWidget::OnServerEntryGenerateRow(TShared
 			{
 				ItemText = FText::FromString(Item->ServerName);
 			}
-			//else if (ColumnName == "GameType")
-			//{
-			//}
-			//else if (ColumnName == "Map")
-			//{
-			//}
+			else if (ColumnName == "GameType")
+			{
+				ItemText = FText::FromString(TEXT("TDM"));
+			}
+			else if (ColumnName == "Map")
+			{
+				ItemText = FText::FromString(TEXT("ArenaMap"));
+			}
 			else if (ColumnName == "PlayerCount")
 			{
 				ItemText = FText::Format(FText::FromString("{0} / {1}"), FText::FromString(Item->CurrentPlayerCount), FText::FromString(Item->MaxPlayerCount));
@@ -143,15 +194,36 @@ TSharedRef<ITableRow> SOnlineJoinSessionWidget::OnServerEntryGenerateRow(TShared
 }
 void SOnlineJoinSessionWidget::OnServerEntryMouseButtonDoubleClicked(TSharedPtr<FServerEntry> InItem)
 {
-	if (GEngine && GEngine->GameViewport)
+	//if (EVisibility::Hidden == CircularThrobber->GetVisibility())
 	{
-		GEngine->GameViewport->RemoveAllViewportWidgets();
+		if (GEngine && GEngine->GameViewport)
+		{
+			GEngine->GameViewport->RemoveAllViewportWidgets();
+		}
+		const auto GameInst = LocalPlayer->GetGameInstance();
+		if (nullptr != GameInst)
+		{
+			GameInst->JoinSession(LocalPlayer.Get(), InItem->Index);
+		}
 	}
-	const auto GameInst = LocalPlayer->GetGameInstance();
-	if (nullptr != GameInst)
+}
+FReply SOnlineJoinSessionWidget::OnCancelButtonClicked()
+{
+	//if (EVisibility::Hidden == CircularThrobber->GetVisibility())
 	{
-		GameInst->JoinSession(LocalPlayer.Get(), InItem->Index);
+		const auto GameInst = Cast<UOnlineGameInstance>(LocalPlayer->GetGameInstance());
+		if (nullptr != GameInst)
+		{
+			if (nullptr != GEngine && nullptr != GEngine->GameViewport)
+			{
+				const auto MainMenu = GameInst->GetMainMenu();
+				GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->JoinSessionWidgetContainer.ToSharedRef());
+				GEngine->GameViewport->AddViewportWidgetContent(MainMenu->FindSessionWidgetContainer.ToSharedRef());
+			}
+		}
 	}
+
+	return FReply::Handled();
 }
 
 void SOnlineJoinSessionWidget::UpdateSearchStatus()
@@ -175,13 +247,13 @@ void SOnlineJoinSessionWidget::UpdateSearchStatus()
 					{
 						for (auto i = 0; i<SessionSearch->SearchResults.Num(); ++i)
 						{
-							const auto& SR = SessionSearch->SearchResults[i];
+							const auto& SearchResult = SessionSearch->SearchResults[i];
 
-							const auto MaxPlayerCount = SR.Session.SessionSettings.NumPublicConnections + SR.Session.SessionSettings.NumPrivateConnections;
-							const auto AvailabePlayerCount = SR.Session.NumOpenPublicConnections + SR.Session.NumOpenPrivateConnections;
+							const auto MaxPlayerCount = SearchResult.Session.SessionSettings.NumPublicConnections + SearchResult.Session.SessionSettings.NumPrivateConnections;
+							const auto AvailabePlayerCount = SearchResult.Session.NumOpenPublicConnections + SearchResult.Session.NumOpenPrivateConnections;
 							const auto CurrentPalyerCount = MaxPlayerCount - AvailabePlayerCount;
 
-							auto ServerEntry = MakeShareable(new FServerEntry({ SR.Session.OwningUserName, FString::FromInt(CurrentPalyerCount), FString::FromInt(MaxPlayerCount), FString::FromInt(SR.PingInMs), i }));
+							auto ServerEntry = MakeShareable(new FServerEntry({ SearchResult.Session.OwningUserName, FString::FromInt(CurrentPalyerCount), FString::FromInt(MaxPlayerCount), FString::FromInt(SearchResult.PingInMs), i }));
 
 							ServerList.Add(ServerEntry);
 						}

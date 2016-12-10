@@ -3,6 +3,9 @@
 #include "UE4Online.h"
 #include "OnlineCreateSessionWidget.h"
 
+#include "OnlineGameInstance.h"
+#include "OnlineMainMenu.h"
+
 #define LOCTEXT_NAMESPACE "CreateSessionWidget"
 
 void SOnlineCreateSessionWidget::Construct(const FArguments& InArgs)
@@ -36,24 +39,24 @@ void SOnlineCreateSessionWidget::Construct(const FArguments& InArgs)
 	const auto PlayerCountHBox = SNew(SHorizontalBox) + SHorizontalBox::Slot();
 	PlayerCountHBox->AddSlot()
 		.HAlign(HAlign_Left)
-		.VAlign(VAlign_Center)
+		.AutoWidth()
 		[
 			DecreaseButton
 		];
 	PlayerCountHBox->AddSlot()
 		.HAlign(HAlign_Center)
-		.VAlign(VAlign_Center)
+		.AutoWidth()
 		[
 			PlayerCountTextBox
 		];
 	PlayerCountHBox->AddSlot()
 		.HAlign(HAlign_Right)
-		.VAlign(VAlign_Center)
+		.AutoWidth()
 		[
 			IncreaseButton
 		];
 
-	//!< IsLAN
+	//!< LAN or インターネット
 	const auto IsLanCheckBox = SNew(SCheckBox)
 		.IsChecked(this, &SOnlineCreateSessionWidget::IsLanCheckBoxChecked)
 		.OnCheckStateChanged(this, &SOnlineCreateSessionWidget::OnIsLanCheckBoxStateChanged)
@@ -75,13 +78,13 @@ void SOnlineCreateSessionWidget::Construct(const FArguments& InArgs)
 	const auto OKCancelHBox = SNew(SHorizontalBox) + SHorizontalBox::Slot();
 	OKCancelHBox->AddSlot()
 		.HAlign(HAlign_Left)
-		.VAlign(VAlign_Center)
+		.AutoWidth()
 		[
 			CancelButton
 		];
 	OKCancelHBox->AddSlot()
 		.HAlign(HAlign_Right)
-		.VAlign(VAlign_Center)
+		.AutoWidth()
 		[
 			OKButton
 		];
@@ -89,7 +92,7 @@ void SOnlineCreateSessionWidget::Construct(const FArguments& InArgs)
 	const auto VBox = SNew(SVerticalBox) + SVerticalBox::Slot();
 	VBox->AddSlot()
 		.HAlign(HAlign_Center)
-		.VAlign(VAlign_Center)
+		.VAlign(VAlign_Top)
 		[
 			TitleTextBlock
 		];
@@ -113,16 +116,26 @@ void SOnlineCreateSessionWidget::Construct(const FArguments& InArgs)
 		];
 	VBox->AddSlot()
 		.HAlign(HAlign_Center)
-		.VAlign(VAlign_Center)
+		.VAlign(VAlign_Bottom)
 		[
 			OKCancelHBox
 		];
 
 	ChildSlot
-		.VAlign(VAlign_Center)
 		.HAlign(HAlign_Center)
+		.VAlign(VAlign_Center)
 		[
-			VBox
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			[
+			SNew(SBox)
+				.WidthOverride(600)
+				.HeightOverride(300)
+				[
+					VBox
+				]
+			]
 		];
 }
 
@@ -165,12 +178,38 @@ void SOnlineCreateSessionWidget::OnIsLanCheckBoxStateChanged(ECheckBoxState Chec
 
 FReply SOnlineCreateSessionWidget::OnOKButtonClicked()
 {
-	//!< #MY_TODO
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->RemoveAllViewportWidgets();
+	}
+	
+	const auto GameInst = Cast<UOnlineGameInstance>(LocalPlayer->GetGameInstance());
+	if (nullptr != GameInst)
+	{
+		const auto MapName = FString(TEXT("ArenaMap")); //!< #MY_TODO 現状固定
+		const auto GameType = FString(TEXT("TDM"));		//!< #MY_TODO 現状固定
+		const auto IsOnline = FString(true ? TEXT("?listen") : TEXT(""));
+		const auto IsLanMatch = FString(bIsLanCheckBoxState ? TEXT("?bIsLanMatch") : TEXT(""));
+
+		const auto InTravelURL = FString::Printf(TEXT("/Game/Maps/%s?game=%s%s%s"), *MapName, *GameType, *IsOnline, *IsLanMatch);
+		GameInst->CreateSession(LocalPlayer.Get(), InTravelURL);
+	}
+
 	return FReply::Handled();
 }
 FReply SOnlineCreateSessionWidget::OnCancelButtonClicked()
 {
-	//!< #MY_TODO
+	const auto GameInst = Cast<UOnlineGameInstance>(LocalPlayer->GetGameInstance());
+	if (nullptr != GameInst)
+	{
+		if (nullptr != GEngine && nullptr != GEngine->GameViewport)
+		{
+			const auto MainMenu = GameInst->GetMainMenu();
+			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->CreateSessionWidgetContainer.ToSharedRef());
+			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->MenuWidgetContainer.ToSharedRef());
+		}
+	}
+
 	return FReply::Handled();
 }
 

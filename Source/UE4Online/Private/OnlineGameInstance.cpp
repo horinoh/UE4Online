@@ -9,9 +9,6 @@
 void UOnlineGameInstance::Init()
 {
 	Super::Init();
-
-	//!< セッション終了時のコールバック
-	//OnEndSessionCompleteDelegate = FOnEndSessionCompleteDelegate::CreateUObject(this, &UOnlineGameInstance::OnEndSessionComplete);
 }
 bool UOnlineGameInstance::JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults)
 {
@@ -53,6 +50,50 @@ bool UOnlineGameInstance::JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSe
 
 	return false;
 }
+//void UOnlineGameInstance::OnStartSessionComplete(FName Name, bool bWasSuccessful)
+//{
+//	const auto World = GetWorld();
+//	if (nullptr != World)
+//	{
+//		const auto GameMode = World->GetAuthGameMode();
+//		if (nullptr != GameMode)
+//		{
+//			const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
+//			if (nullptr != Session)
+//			{
+//				Session->StartSessionCompleteEvent.Remove(OnStartSessionCompleteDelegateHandle);
+//
+//				if (bWasSuccessful)
+//				{
+//					UE_LOG(LogUE4Online, Log, TEXT("OnStartSessionComplete"));
+//					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("OnStartSessionComplete : ") + Name.ToString());
+//				}
+//			}
+//		}
+//	}
+//}
+//void UOnlineGameInstance::OnEndSessionComplete(FName Name, bool bWasSuccessful)
+//{
+//	const auto World = GetWorld();
+//	if (nullptr != World)
+//	{
+//		const auto GameMode = World->GetAuthGameMode();
+//		if (nullptr != GameMode)
+//		{
+//			const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
+//			if (nullptr != Session)
+//			{
+//				Session->EndSessionCompleteEvent.Remove(OnEndSessionCompleteDelegateHandle);
+//
+//				if (bWasSuccessful)
+//				{
+//					UE_LOG(LogUE4Online, Log, TEXT("OnEndSessionComplete"));
+//					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("OnEndSessionComplete : ") + Name.ToString());
+//				}
+//			}
+//		}
+//	}
+//}
 void UOnlineGameInstance::OnCreateSessionComplete(FName Name, bool bWasSuccessful)
 {
 	const auto World = GetWorld();
@@ -71,28 +112,6 @@ void UOnlineGameInstance::OnCreateSessionComplete(FName Name, bool bWasSuccessfu
 					UE_LOG(LogUE4Online, Log, TEXT("OnCreateSessionComplete"));
 					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("OnCreateSettionComplete : ") + Name.ToString());
 					//#MY_TODO World->ServerTravel(TravelURL);CreateSession() の引数 InTravelURL を覚えておく
-				}
-			}
-		}
-	}
-}
-void UOnlineGameInstance::OnStartSessionComplete(FName Name, bool bWasSuccessful)
-{
-	const auto World = GetWorld();
-	if (nullptr != World)
-	{
-		const auto GameMode = World->GetAuthGameMode();
-		if (nullptr != GameMode)
-		{
-			const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
-			if (nullptr != Session)
-			{
-				Session->StartSessionCompleteEvent.Remove(OnStartSessionCompleteDelegateHandle);
-
-				if (bWasSuccessful)
-				{
-					UE_LOG(LogUE4Online, Log, TEXT("OnStartSessionComplete"));
-					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("OnStartSessionComplete : ") + Name.ToString());
 				}
 			}
 		}
@@ -195,6 +214,66 @@ void UOnlineGameInstance::OnDestroySessionComplete(FName Name, bool bWasSuccessf
 	}
 }
 
+bool UOnlineGameInstance::StartSession()
+{
+	const auto World = GetWorld();
+	if (nullptr != World)
+	{
+		const auto GameMode = World->GetAuthGameMode();
+		if (nullptr != GameMode)
+		{
+			const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
+			if (nullptr != Session)
+			{
+#if 1
+				Session->SessionName = GameSessionName;
+				Session->HandleMatchHasStarted();
+				return true;
+#else
+				//!< StartSession() が完了した時のデリゲートをイベントへ登録
+				OnStartSessionCompleteDelegateHandle = Session->StartSessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnStartSessionComplete);
+				if (Session->StartSession(GameSessionName))
+				{
+					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("StartSession"));
+					return true;
+				}
+#endif
+			}
+		}
+	}
+
+	return false;
+}
+bool UOnlineGameInstance::EndSession()
+{
+	const auto World = GetWorld();
+	if (nullptr != World)
+	{
+		const auto GameMode = World->GetAuthGameMode();
+		if (nullptr != GameMode)
+		{
+			const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
+			if (nullptr != Session)
+			{
+#if 1
+				Session->SessionName = GameSessionName;
+				Session->HandleMatchHasEnded();
+				return true;
+#else
+				//!< EndSession() が完了した時のデリゲートをイベントへ登録
+				OnEndSessionCompleteDelegateHandle = Session->EndSessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnEndSessionComplete);
+				if (Session->EndSession(GameSessionName))
+				{
+					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("EndSession"));
+					return true;
+				}
+#endif
+			}
+		}
+	}
+
+	return false;
+}
 bool UOnlineGameInstance::CreateSession(ULocalPlayer* LocalPlayer, const FString& InTravelURL)
 {
 	//!< 非オンラインの場合は ServerTravel() で直接 InTravelURL へ
@@ -207,21 +286,23 @@ bool UOnlineGameInstance::CreateSession(ULocalPlayer* LocalPlayer, const FString
 		}
 	}
 
-	//!< InTravelURL から GameType と MapName と bIsLan を作る
-	//!< URL の形式 "/Game/Maps/MyMap?game=TDM?listen?bIsLan?Bots=0?DemoRec"
-	const FString& MapNameSubStr = "/Game/Maps/";
-	//!< RightChop()...指定位置よりも右側の文字列を取得、LeftChop()...指定位置よりも左側の文字列を取得
+	/**
+	InTravelURL から MAPNAME、GAMETYPE、ISLAMMATCH を取得
+	URL の形式 : "/Game/Online/Map/[MAPNAME]?game=[GAMETYPE]?listen?[ISLANMATCH]"
+	*/
+	const FString& MapNameSubStr = "/Game/Online/Map/";
+
 	const auto ChoppedMapName = InTravelURL.RightChop(MapNameSubStr.Len());
 	const auto MapName = ChoppedMapName.LeftChop(ChoppedMapName.Len() - ChoppedMapName.Find("?game"));
 
 	const auto ChoppedGameType = InTravelURL.RightChop(InTravelURL.Find("game=") + FString(TEXT("game=")).Len());
 	const auto GameType = ChoppedGameType.LeftChop(ChoppedGameType.Len() - ChoppedGameType.Find("?"));
 
-	const auto bIsLan = InTravelURL.Contains(TEXT("?bIsLan"));
+	const auto bIsLanMatch = InTravelURL.Contains(TEXT("?bIsLanMatch"));
 
-	return CreateSession(LocalPlayer, GameType, MapName, bIsLan);
+	return CreateSession(LocalPlayer, GameType, MapName, bIsLanMatch);
 }
-bool UOnlineGameInstance::CreateSession(ULocalPlayer* LocalPlayer, const FString& GameType, const FString& MapName, bool bIsLAN)
+bool UOnlineGameInstance::CreateSession(ULocalPlayer* LocalPlayer, const FString& GameType, const FString& MapName, bool bIsLanMatch)
 {
 	const auto World = GetWorld();
 	if (nullptr != World)
@@ -232,12 +313,11 @@ bool UOnlineGameInstance::CreateSession(ULocalPlayer* LocalPlayer, const FString
 			const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
 			if (nullptr != Session)
 			{
-				//!< CreateSession() が完了した時のデリゲートをイベントへ登録
 				OnCreateSessionCompleteDelegateHandle = Session->CreateSessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnCreateSessionComplete);
 
+				const auto bIsPresence = true;
 				const auto NumPlayers = 8;
-				//!< AOnlineGameSession::CreateSession() をコールする、結果的に CreateSession() がコールされる
-				if (Session->CreateSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, GameType, MapName, bIsLAN, true, NumPlayers))
+				if (Session->CreateSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, GameType, MapName, bIsLanMatch, bIsPresence, NumPlayers))
 				{
 					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("CreateSession"));
 					return true;
@@ -248,32 +328,7 @@ bool UOnlineGameInstance::CreateSession(ULocalPlayer* LocalPlayer, const FString
 
 	return false;
 }
-bool UOnlineGameInstance::StartSession()
-{
-	const auto World = GetWorld();
-	if (nullptr != World)
-	{
-		const auto GameMode = World->GetAuthGameMode();
-		if (nullptr != GameMode)
-		{
-			const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
-			if (nullptr != Session)
-			{
-				//!< StartSession() が完了した時のデリゲートをイベントへ登録
-				OnStartSessionCompleteDelegateHandle = Session->StartSessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnStartSessionComplete);
-
-				if (Session->StartSession(GameSessionName))
-				{
-					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("StartSession"));
-					return true;
-				}
-			}
-		}
-	}
-
-	return false;
-}
-bool UOnlineGameInstance::FindSessions(ULocalPlayer* PlayerOwner, bool bIsLAN)
+bool UOnlineGameInstance::FindSessions(ULocalPlayer* PlayerOwner, bool bIsLanMatch)
 {
 	if (nullptr != PlayerOwner)
 	{
@@ -287,12 +342,10 @@ bool UOnlineGameInstance::FindSessions(ULocalPlayer* PlayerOwner, bool bIsLAN)
 				if (nullptr != Session)
 				{
 					Session->FindSessionsCompleteEvent.RemoveAll(this);
-
-					//!< FindSessions() が完了した時のデリゲートをイベントへ登録
 					OnFindSessionsCompleteDelegateHandle = Session->FindSessionsCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnFindSessionsComplete);
 
 					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, TEXT("Finding Sessions ..."));
-					Session->FindSessions(PlayerOwner->GetPreferredUniqueNetId(), GameSessionName, bIsLAN, true);
+					Session->FindSessions(PlayerOwner->GetPreferredUniqueNetId(), GameSessionName, bIsLanMatch, true);
 					return true;
 				}
 			}
@@ -336,10 +389,10 @@ bool UOnlineGameInstance::StartPIEGameInstance(ULocalPlayer* LocalPlayer, bool b
 
 	if (nullptr != GEngine && nullptr != GEngine->GameViewport)
 	{
-		//GEngine->GameViewport->AddViewportWidgetContent(MainMenu->MenuWidgetContainer.ToSharedRef());
+		GEngine->GameViewport->AddViewportWidgetContent(MainMenu->MenuWidgetContainer.ToSharedRef());
 		//GEngine->GameViewport->AddViewportWidgetContent(MainMenu->CreateSessionWidgetContainer.ToSharedRef());
 		//GEngine->GameViewport->AddViewportWidgetContent(MainMenu->FindSessionWidgetContainer.ToSharedRef());
-		GEngine->GameViewport->AddViewportWidgetContent(MainMenu->JoinSessionWidgetContainer.ToSharedRef());
+		//GEngine->GameViewport->AddViewportWidgetContent(MainMenu->JoinSessionWidgetContainer.ToSharedRef());
 	}
 
 	return Super::StartPIEGameInstance(LocalPlayer, bInSimulateInEditor, bAnyBlueprintErrors, bStartInSpectatorMode);

@@ -21,25 +21,28 @@ public:
 	virtual bool JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults) override;
 	virtual bool JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult) override;
 
+	//void OnStartSessionComplete(FName Name, bool bWasSuccessful);
+	//void OnEndSessionComplete(FName Name, bool bWasSuccessful);
 	void OnCreateSessionComplete(FName Name, bool bWasSuccessful);
-	void OnStartSessionComplete(FName Name, bool bWasSuccessful);
 	void OnFindSessionsComplete(bool bWasSuccessful);
 	void OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type Result);
 	void OnDestroySessionComplete(FName Name, bool bWasSuccessful);
 
-	//void OnEndSessionComplete(FName Name, bool bWasSuccessful);
-
-	bool CreateSession(ULocalPlayer* LocalPlayer, const FString& InTravelURL);
-	bool CreateSession(ULocalPlayer* LocalPlayer, const FString& GameType, const FString& MapName, bool bIsLAN);
 	bool StartSession();
-	bool FindSessions(ULocalPlayer* PlayerOwner, bool bIsLAN);
+	bool EndSession();
+	bool CreateSession(ULocalPlayer* LocalPlayer, const FString& InTravelURL);
+	bool CreateSession(ULocalPlayer* LocalPlayer, const FString& GameType, const FString& MapName, bool bIsLanMatch);
+	bool FindSessions(ULocalPlayer* PlayerOwner, bool bIsLanMatch);
 	bool DestroySession();
 
 	virtual bool StartPIEGameInstance(ULocalPlayer* LocalPlayer, bool bInSimulateInEditor, bool bAnyBlueprintErrors, bool bStartInSpectatorMode) override;
 
+	TSharedPtr<class FOnlineMainMenu> GetMainMenu() const { return MainMenu; }
+
 protected:
+	//FDelegateHandle OnStartSessionCompleteDelegateHandle;
+	//FDelegateHandle OnEndSessionCompleteDelegateHandle;
 	FDelegateHandle OnCreateSessionCompleteDelegateHandle;
-	FDelegateHandle OnStartSessionCompleteDelegateHandle;
 	FDelegateHandle OnFindSessionsCompleteDelegateHandle;
 	FDelegateHandle OnJoinSessionCompleteDelegateHandle;
 	FDelegateHandle OnDestroySessionCompleteDelegateHandle;
