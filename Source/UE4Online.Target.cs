@@ -8,7 +8,9 @@ public class UE4OnlineTarget : TargetRules
 	public UE4OnlineTarget(TargetInfo Target)
 	{
 		Type = TargetType.Game;
-	}
+
+        bUsesSteam = true;
+    }
 
 	//
 	// TargetRules interface.

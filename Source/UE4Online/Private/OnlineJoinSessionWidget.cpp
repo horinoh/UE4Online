@@ -217,8 +217,8 @@ FReply SOnlineJoinSessionWidget::OnCancelButtonClicked()
 			if (nullptr != GEngine && nullptr != GEngine->GameViewport)
 			{
 				const auto MainMenu = GameInst->GetMainMenu();
-				GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->JoinSessionWidgetContainer.ToSharedRef());
-				GEngine->GameViewport->AddViewportWidgetContent(MainMenu->FindSessionWidgetContainer.ToSharedRef());
+				GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->GetJoinSessionWidgetContainer().ToSharedRef());
+				GEngine->GameViewport->AddViewportWidgetContent(MainMenu->GetFindSessionWidgetContainer().ToSharedRef());
 			}
 		}
 	}

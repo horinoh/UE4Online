@@ -105,8 +105,8 @@ FReply SOnlineFindSessionWidget::OnOKButtonClicked()
 		if (nullptr != GEngine && nullptr != GEngine->GameViewport)
 		{
 			const auto MainMenu = GameInst->GetMainMenu();
-			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->FindSessionWidgetContainer.ToSharedRef());
-			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->JoinSessionWidgetContainer.ToSharedRef());
+			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->GetFindSessionWidgetContainer().ToSharedRef());
+			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->GetJoinSessionWidgetContainer().ToSharedRef());
 		}
 
 		//!< セッション検索開始
@@ -123,8 +123,8 @@ FReply SOnlineFindSessionWidget::OnCancelButtonClicked()
 		if (nullptr != GEngine && nullptr != GEngine->GameViewport)
 		{
 			const auto MainMenu = GameInst->GetMainMenu();
-			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->FindSessionWidgetContainer.ToSharedRef());
-			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->MenuWidgetContainer.ToSharedRef());
+			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->GetFindSessionWidgetContainer().ToSharedRef());
+			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->GetMenuWidgetContainer().ToSharedRef());
 		}
 	}
 

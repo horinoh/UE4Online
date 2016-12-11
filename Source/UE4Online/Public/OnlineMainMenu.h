@@ -16,10 +16,15 @@ public:
 
 	void Construct(TWeakObjectPtr<class UOnlineGameInstance> GI, TWeakObjectPtr<ULocalPlayer> LP);
 
+	TSharedPtr<class SWeakWidget> GetMenuWidgetContainer() const { return MenuWidgetContainer; }
+	TSharedPtr<class SWeakWidget> GetCreateSessionWidgetContainer() const { return CreateSessionWidgetContainer; }
+	TSharedPtr<class SWeakWidget> GetFindSessionWidgetContainer() const { return  FindSessionWidgetContainer; }
+	TSharedPtr<class SWeakWidget> GetJoinSessionWidgetContainer() const { return JoinSessionWidgetContainer; }
+
 protected:
 	TWeakObjectPtr<class UOnlineGameInstance> GameInstance;
 	TWeakObjectPtr<ULocalPlayer> LocalPlayer;
-public:
+
 	TSharedPtr<class SOnlineMenuWidget> MenuWidget;
 	TSharedPtr<class SWeakWidget> MenuWidgetContainer;
 

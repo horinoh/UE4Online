@@ -18,34 +18,30 @@ class UE4ONLINE_API UOnlineGameInstance : public UGameInstance
 public:
 	//!< UGameInstance
 	virtual void Init() override;
+	virtual void StartGameInstance() override;
+	virtual bool StartPIEGameInstance(ULocalPlayer* LocalPlayer, bool bInSimulateInEditor, bool bAnyBlueprintErrors, bool bStartInSpectatorMode) override;
 	virtual bool JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults) override;
 	virtual bool JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult) override;
 
-	//void OnStartSessionComplete(FName Name, bool bWasSuccessful);
-	//void OnEndSessionComplete(FName Name, bool bWasSuccessful);
 	void OnCreateSessionComplete(FName Name, bool bWasSuccessful);
 	void OnFindSessionsComplete(bool bWasSuccessful);
 	void OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type Result);
 	void OnDestroySessionComplete(FName Name, bool bWasSuccessful);
 
-	bool StartSession();
-	bool EndSession();
 	bool CreateSession(ULocalPlayer* LocalPlayer, const FString& InTravelURL);
 	bool CreateSession(ULocalPlayer* LocalPlayer, const FString& GameType, const FString& MapName, bool bIsLanMatch);
 	bool FindSessions(ULocalPlayer* PlayerOwner, bool bIsLanMatch);
 	bool DestroySession();
 
-	virtual bool StartPIEGameInstance(ULocalPlayer* LocalPlayer, bool bInSimulateInEditor, bool bAnyBlueprintErrors, bool bStartInSpectatorMode) override;
-
 	TSharedPtr<class FOnlineMainMenu> GetMainMenu() const { return MainMenu; }
 
 protected:
-	//FDelegateHandle OnStartSessionCompleteDelegateHandle;
-	//FDelegateHandle OnEndSessionCompleteDelegateHandle;
 	FDelegateHandle OnCreateSessionCompleteDelegateHandle;
 	FDelegateHandle OnFindSessionsCompleteDelegateHandle;
 	FDelegateHandle OnJoinSessionCompleteDelegateHandle;
 	FDelegateHandle OnDestroySessionCompleteDelegateHandle;
+
+	FString TravelURL;
 
 	TSharedPtr<class FOnlineMainMenu> MainMenu;
 };

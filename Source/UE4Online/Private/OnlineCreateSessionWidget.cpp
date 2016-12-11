@@ -191,7 +191,7 @@ FReply SOnlineCreateSessionWidget::OnOKButtonClicked()
 		const auto IsOnline = FString(true ? TEXT("?listen") : TEXT(""));
 		const auto IsLanMatch = FString(bIsLanCheckBoxState ? TEXT("?bIsLanMatch") : TEXT(""));
 
-		const auto InTravelURL = FString::Printf(TEXT("/Game/Maps/%s?game=%s%s%s"), *MapName, *GameType, *IsOnline, *IsLanMatch);
+		const auto InTravelURL = FString::Printf(TEXT("/Game/Online/Map/%s?game=%s%s%s"), *MapName, *GameType, *IsOnline, *IsLanMatch);
 		GameInst->CreateSession(LocalPlayer.Get(), InTravelURL);
 	}
 
@@ -205,8 +205,8 @@ FReply SOnlineCreateSessionWidget::OnCancelButtonClicked()
 		if (nullptr != GEngine && nullptr != GEngine->GameViewport)
 		{
 			const auto MainMenu = GameInst->GetMainMenu();
-			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->CreateSessionWidgetContainer.ToSharedRef());
-			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->MenuWidgetContainer.ToSharedRef());
+			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->GetCreateSessionWidgetContainer().ToSharedRef());
+			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->GetMenuWidgetContainer().ToSharedRef());
 		}
 	}
 

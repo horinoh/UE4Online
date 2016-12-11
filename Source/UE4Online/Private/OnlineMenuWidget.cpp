@@ -87,8 +87,8 @@ FReply SOnlineMenuWidget::OnCreateSessionButtonClicked()
 		if (nullptr != GEngine && nullptr != GEngine->GameViewport)
 		{
 			const auto MainMenu = GameInst->GetMainMenu();
-			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->MenuWidgetContainer.ToSharedRef());
-			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->CreateSessionWidgetContainer.ToSharedRef());
+			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->GetMenuWidgetContainer().ToSharedRef());
+			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->GetCreateSessionWidgetContainer().ToSharedRef());
 		}
 	}
 
@@ -102,8 +102,8 @@ FReply SOnlineMenuWidget::OnFindSessionButtonClicked()
 		if (nullptr != GEngine && nullptr != GEngine->GameViewport)
 		{
 			const auto MainMenu = GameInst->GetMainMenu();
-			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->MenuWidgetContainer.ToSharedRef());
-			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->FindSessionWidgetContainer.ToSharedRef());
+			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->GetMenuWidgetContainer().ToSharedRef());
+			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->GetFindSessionWidgetContainer().ToSharedRef());
 		}
 	}
 
