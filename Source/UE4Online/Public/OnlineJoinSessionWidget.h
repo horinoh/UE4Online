@@ -2,6 +2,9 @@
 
 #pragma once
 
+#include "SThrobber.h"
+#include "OnlineSubsystemTypes.h"
+
 /**
  * 
  */
@@ -38,4 +41,7 @@ protected:
 	TWeakObjectPtr<ULocalPlayer> LocalPlayer;
 
 	TArray<TSharedPtr<FServerEntry> > ServerList;
+
+	TSharedRef<class SCircularThrobber> CircularThrobber = SNew(SCircularThrobber);
+	EOnlineAsyncTaskState::Type PrevSearchState = EOnlineAsyncTaskState::NotStarted;
 };

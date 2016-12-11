@@ -7,9 +7,6 @@ AOnlineGameSession::AOnlineGameSession()
 {
 	if (!HasAnyFlags(RF_ClassDefaultObject))
 	{
-		//OnStartSessionCompleteDelegate = FOnStartSessionCompleteDelegate::CreateUObject(this, &AOnlineGameSession::);
-		//OnEndSessionCompleteDelegate = FOnEndSessionCompleteDelegate::CreateUObject(this, &AOnlineGameSession::);
-
 		OnCreateSessionCompleteDelegate = FOnCreateSessionCompleteDelegate::CreateUObject(this, &AOnlineGameSession::OnCreateSessionComplete);
 		OnFindSessionsCompleteDelegate = FOnFindSessionsCompleteDelegate::CreateUObject(this, &AOnlineGameSession::OnFindSessionsComplete);
 		OnJoinSessionCompleteDelegate = FOnJoinSessionCompleteDelegate::CreateUObject(this, &AOnlineGameSession::OnJoinSessionComplete);
@@ -17,74 +14,6 @@ AOnlineGameSession::AOnlineGameSession()
 	}
 }
 
-//void AOnlineGameSession::HandleMatchHasStarted()
-//{
-//	Super::HandleMatchHasStarted();
-//}
-//void AOnlineGameSession::HandleMatchHasEnded()
-//{
-//	Super::HandleMatchHasEnded();
-//}
-//void AOnlineGameSession::OnStartSessionComplete(FName InSessionName, bool bWasSuccessful)
-//{
-//	//!< private なので Super::OnStartSessionComplete() はコールできない
-//	//UE_LOG(LogGameSession, Verbose, TEXT("OnStartSessionComplete %s bSuccess: %d"), *InSessionName.ToString(), bWasSuccessful);
-//
-//	/**
-//	AGameMode::MatchHasXXX() 
-//	→ AGameSession::MatchHasXXX() 
-//	→ APlayerController::ClientStartOnlineSession() 
-//	→ UOnlineSessionClient::StartOnlineSession(PlayerState->SessionName)
-//	→ StartSession(SessionName);
-//	とコールされるのでいらない気がする
-//	*/
-//	if (bWasSuccessful)
-//	{
-//		const auto World = GetWorld();
-//		if (nullptr != World)
-//		{
-//			for (auto It = World->GetPlayerControllerIterator(); It; ++It)
-//			{
-//				//!< 非ローカルプレイヤに伝える
-//				auto PC = Cast<APlayerController>(*It);
-//				if (nullptr != PC && !PC->IsLocalPlayerController())
-//				{
-//					//PC->ClientStartOnlineGame();
-//				}
-//			}
-//		}
-//	}
-//}
-//void AOnlineGameSession::OnEndSessionComplete(FName InSessionName, bool bWasSuccessful)
-//{
-//	//!< private なので Super::OnEndSessionComplete() はコールできない
-//	//UE_LOG(LogGameSession, Verbose, TEXT("OnEndSessionComplete %s bSuccess: %d"), *InSessionName.ToString(), bWasSuccessful);
-//
-//	/**
-//	AGameMode::MatchHasXXX() 
-//	→ AGameSession::MatchHasXXX() 
-//	→ APlayerController::ClientStartOnlineSession() 
-//	→ UOnlineSessionClient::StartOnlineSession(PlayerState->SessionName)
-//	→ StartSession(SessionName);
-//	とコールされるのでいらない気がする
-//	*/
-//	if (bWasSuccessful)
-//	{
-//		const auto World = GetWorld();
-//		if (nullptr != World)
-//		{
-//			for (auto It = World->GetPlayerControllerIterator(); It; ++It)
-//			{
-//				//!< 非ローカルプレイヤに伝える
-//				auto PC = Cast<APlayerController>(*It);
-//				if (nullptr != PC && !PC->IsLocalPlayerController())
-//				{
-//					//PC->ClientEndOnlineGame();
-//				}
-//			}
-//		}
-//	}
-//}
 void AOnlineGameSession::OnCreateSessionComplete(FName InSessionName, bool bWasSuccessful)
 {
 	UE_LOG(LogUE4Online, Log, TEXT("OnCreateSessionComplete"));
@@ -190,48 +119,6 @@ bool AOnlineGameSession::CreateSession(TSharedPtr<const FUniqueNetId> UserId, FN
 
 	return false;
 }
-//!< 参考 AGameSession::HandleMatchHasStarted()
-//bool AOnlineGameSession::StartSession(FName InSessionName)
-//{
-//	const auto OnlineSub = IOnlineSubsystem::Get();
-//	if (nullptr != OnlineSub)
-//	{
-//		const auto Session = OnlineSub->GetSessionInterface();
-//		if (Session.IsValid())
-//		{
-//			StartSessionCompleteHandle = Session->AddOnStartSessionCompleteDelegate_Handle(OnStartSessionCompleteDelegate);
-//			return Session->StartSession(Name);
-//		}
-//	}
-//
-//	return false;
-//}
-//!< 参考 AGameSession::HandleMatchHasEnded()
-//bool AOnlineGameSession::EndSession(FName InSessionName)
-//{
-//	const auto OnlineSub = IOnlineSubsystem::Get();
-//	if (nullptr != OnlineSub)
-//	{
-//		const auto Session = OnlineSub->GetSessionInterface();
-//		if (Session.IsValid())
-//		{
-//			const auto World = GetWorld();
-//			if (nullptr != World)
-//			{
-//				for (auto It = World->GetPlayerControllerIterator(); It; ++It)
-//				{
-//					//!< #MY_TODO
-//					//if(It->IsLocal)
-//					//It->Get()->ClientEndOnlineSession();
-//				}
-//			}
-//			EndSessionCompleteHandle = Session->AddOnEndSessionCompleteDelegate_Handle(OnEndSessionCompleteDelegate);
-//			return Session->EndSession(Name);
-//		}
-//	}
-//
-//	return false;
-//}
 
 void AOnlineGameSession::FindSessions(TSharedPtr<const FUniqueNetId> UserId, FName InSessionName, bool bIsLAN, bool bIsPresence)
 {

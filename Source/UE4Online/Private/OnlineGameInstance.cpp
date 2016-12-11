@@ -9,6 +9,8 @@
 void UOnlineGameInstance::Init()
 {
 	Super::Init();
+
+	//!< #MY_TODO 各種コールバックの設定
 }
 void UOnlineGameInstance::StartGameInstance()
 {
@@ -16,7 +18,6 @@ void UOnlineGameInstance::StartGameInstance()
 
 	MainMenu = MakeShareable(new FOnlineMainMenu());
 	MainMenu->Construct(this, GetFirstGamePlayer());
-
 	if (nullptr != GEngine && nullptr != GEngine->GameViewport)
 	{
 		GEngine->GameViewport->AddViewportWidgetContent(MainMenu->GetMenuWidgetContainer().ToSharedRef());
@@ -26,7 +27,6 @@ bool UOnlineGameInstance::StartPIEGameInstance(ULocalPlayer* LocalPlayer, bool b
 {
 	MainMenu = MakeShareable(new FOnlineMainMenu());
 	MainMenu->Construct(this, GetFirstGamePlayer());
-
 	if (nullptr != GEngine && nullptr != GEngine->GameViewport)
 	{
 		GEngine->GameViewport->AddViewportWidgetContent(MainMenu->GetMenuWidgetContainer().ToSharedRef());
@@ -115,7 +115,7 @@ void UOnlineGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 				if (bWasSuccessful)
 				{
 					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, TEXT("OnFindSessionComplete : ") + GameSessionName.ToString());
-					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString::FromInt(Session->OnlineSessionSearch->SearchResults.Num()));
+					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString::FromInt(Session->GetOnlineSessionSearch()->SearchResults.Num()));
 				}
 			}
 		}

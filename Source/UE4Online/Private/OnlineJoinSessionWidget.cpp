@@ -3,8 +3,6 @@
 #include "UE4Online.h"
 #include "OnlineJoinSessionWidget.h"
 
-#include "SThrobber.h"
-
 #include "OnlineGameSession.h"
 #include "OnlineGameInstance.h"
 #include "OnlineMainMenu.h"
@@ -27,15 +25,26 @@ void SOnlineJoinSessionWidget::Tick(const FGeometry& AllottedGeometry, const dou
 				const auto GameSession = Cast<AOnlineGameSession>(GameMode->GameSession);
 				if (nullptr != GameSession)
 				{
-					//GameSession->GetSearchResultStatus();
-
-					//switch (SearchState)
-					//{
-					//case EOnlineAsyncTaskState::InProgress:
-					//	break;
-					//case EOnlineAsyncTaskState::Done:
-					//	break;
-					//}
+					const auto SearchState = GameSession->GetOnlineSessionSearch().Get()->SearchState;
+					if (PrevSearchState != SearchState)
+					{
+						switch (SearchState)
+						{
+						case EOnlineAsyncTaskState::InProgress:
+							CircularThrobber->SetVisibility(EVisibility::Visible);
+							break; 
+						case EOnlineAsyncTaskState::Done:
+							CircularThrobber->SetVisibility(EVisibility::Hidden);
+							UpdateSearchStatus();
+							break;
+						default:
+						case EOnlineAsyncTaskState::Failed:
+						case EOnlineAsyncTaskState::NotStarted:
+							CircularThrobber->SetVisibility(EVisibility::Hidden);
+							break;
+						}
+					}
+					PrevSearchState = SearchState;
 				}
 			}
 		}
@@ -84,8 +93,6 @@ void SOnlineJoinSessionWidget::Construct(const FArguments& InArgs)
 		);
 
 	//!< 円形スロバー
-	const auto CircularThrobber = SNew(SCircularThrobber);
-	//CircularThrobber->SetVisibility(EVisibility::Hidden);
 	CircularThrobber->SetVisibility(EVisibility::Visible);
 
 	//!< Cancel
@@ -194,7 +201,7 @@ TSharedRef<ITableRow> SOnlineJoinSessionWidget::OnServerEntryGenerateRow(TShared
 }
 void SOnlineJoinSessionWidget::OnServerEntryMouseButtonDoubleClicked(TSharedPtr<FServerEntry> InItem)
 {
-	//if (EVisibility::Hidden == CircularThrobber->GetVisibility())
+	if (EVisibility::Hidden == CircularThrobber->GetVisibility())
 	{
 		if (GEngine && GEngine->GameViewport)
 		{
@@ -209,7 +216,7 @@ void SOnlineJoinSessionWidget::OnServerEntryMouseButtonDoubleClicked(TSharedPtr<
 }
 FReply SOnlineJoinSessionWidget::OnCancelButtonClicked()
 {
-	//if (EVisibility::Hidden == CircularThrobber->GetVisibility())
+	if (EVisibility::Hidden == CircularThrobber->GetVisibility())
 	{
 		const auto GameInst = Cast<UOnlineGameInstance>(LocalPlayer->GetGameInstance());
 		if (nullptr != GameInst)
@@ -242,7 +249,7 @@ void SOnlineJoinSessionWidget::UpdateSearchStatus()
 				{
 					ServerList.Empty();
 
-					const auto SessionSearch = Session->OnlineSessionSearch;
+					const auto SessionSearch = Session->GetOnlineSessionSearch();
 					if (SessionSearch->SearchResults.Num())
 					{
 						for (auto i = 0; i<SessionSearch->SearchResults.Num(); ++i)
