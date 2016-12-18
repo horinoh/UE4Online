@@ -77,6 +77,14 @@ void SOnlineMenuWidget::Construct(const FArguments& InArgs)
 					]
 			]
 		];
+
+	//const auto PC = LocalPlayer->GetPlayerController(LocalPlayer->GetWorld());
+	//if (nullptr != PC)
+	//{
+	//	PC->bShowMouseCursor = true;
+	//	PC->bEnableClickEvents = true;
+	//	PC->bEnableMouseOverEvents = true;
+	//}
 }
 
 FReply SOnlineMenuWidget::OnCreateSessionButtonClicked()

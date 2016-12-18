@@ -47,7 +47,6 @@ bool UOnlineGameInstance::JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIn
 			OnJoinSessionCompleteDelegateHandle = Session->JoinSessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnJoinSessionComplete);
 			if (Session->JoinSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, SessionIndexInSearchResults))
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("JoinSession"));
 				return true;
 			}
 		}
@@ -67,7 +66,6 @@ bool UOnlineGameInstance::JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSe
 			OnJoinSessionCompleteDelegateHandle = Session->JoinSessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnJoinSessionComplete);
 			if (Session->JoinSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, SearchResult))
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("JoinSession"));
 				return true;
 			}
 		}
@@ -90,9 +88,6 @@ void UOnlineGameInstance::OnCreateSessionComplete(FName Name, bool bWasSuccessfu
 
 				if (bWasSuccessful)
 				{
-					UE_LOG(LogUE4Online, Log, TEXT("OnCreateSessionComplete"));
-					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("OnCreateSettionComplete : ") + Name.ToString());
-					
 					World->ServerTravel(TravelURL);
 				}
 			}
@@ -114,8 +109,6 @@ void UOnlineGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 
 				if (bWasSuccessful)
 				{
-					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, TEXT("OnFindSessionComplete : ") + GameSessionName.ToString());
-					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, FString::FromInt(Session->GetOnlineSessionSearch()->SearchResults.Num()));
 				}
 			}
 		}
@@ -147,8 +140,6 @@ void UOnlineGameInstance::OnJoinSessionComplete(EOnJoinSessionCompleteResult::Ty
 							FString URL;
 							if (SessionInterface->GetResolvedConnectString(GameSessionName, URL))
 							{
-								GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("OnJoinSessionComplete : ") + URL);
-
 								const auto PC = GetFirstLocalPlayerController();
 								if (nullptr != PC)
 								{
@@ -188,8 +179,6 @@ void UOnlineGameInstance::OnDestroySessionComplete(FName Name, bool bWasSuccessf
 
 				if (bWasSuccessful)
 				{
-					UE_LOG(LogUE4Online, Log, TEXT("OnDestroySessionComplete"));
-					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("OnDestroySessionComplete : ") + Name.ToString());
 				}
 			}
 		}
@@ -242,13 +231,13 @@ bool UOnlineGameInstance::CreateSession(ULocalPlayer* LocalPlayer, const FString
 				const auto NumPlayers = 8;
 				if (Session->CreateSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, GameType, MapName, bIsLanMatch, bIsPresence, NumPlayers))
 				{
-					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("CreateSession"));
 					return true;
 				}
 			}
 		}
 	}
 
+	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, (TEXT("CreateSession [%s] Failed"), GameSessionName.ToString()));
 	return false;
 }
 bool UOnlineGameInstance::FindSessions(ULocalPlayer* PlayerOwner, bool bIsLanMatch)
@@ -267,7 +256,6 @@ bool UOnlineGameInstance::FindSessions(ULocalPlayer* PlayerOwner, bool bIsLanMat
 					Session->FindSessionsCompleteEvent.RemoveAll(this);
 					OnFindSessionsCompleteDelegateHandle = Session->FindSessionsCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnFindSessionsComplete);
 
-					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, TEXT("Finding Sessions ..."));
 					Session->FindSessions(PlayerOwner->GetPreferredUniqueNetId(), GameSessionName, bIsLanMatch, true);
 					return true;
 				}
@@ -294,7 +282,6 @@ bool UOnlineGameInstance::DestroySession()
 
 				if (Session->DestroySession(GameSessionName))
 				{
-					GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("DestroySession"));
 					return true;
 				}
 			}

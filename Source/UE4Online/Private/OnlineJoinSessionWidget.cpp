@@ -55,7 +55,7 @@ void SOnlineJoinSessionWidget::Construct(const FArguments& InArgs)
 {
 	LocalPlayer = InArgs._LocalPlayer;
 
-#if 1
+#if 0
 	//!< #MY_TODO ƒeƒXƒg
 	ServerList.Add(MakeShareable(new FServerEntry({ "AAA", "1", "10", "0" })));
 	ServerList.Add(MakeShareable(new FServerEntry({ "BBB", "3", "8", "11" })));
