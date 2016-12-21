@@ -48,6 +48,22 @@ void AOnlineGameSession::OnFindSessionsComplete(bool bWasSuccessful)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, i.Session.GetSessionIdStr());
 		}
+
+		switch (OnlineSessionSearch->SearchState)
+		{
+		case EOnlineAsyncTaskState::InProgress:
+			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("InProgress"));
+			break;
+		case EOnlineAsyncTaskState::Done:
+			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("Done"));
+			break;
+		case EOnlineAsyncTaskState::Failed:
+			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("Failed"));
+			break;
+		case EOnlineAsyncTaskState::NotStarted:
+			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("NotStarted"));
+			break;
+		}
 	}
 
 	const auto OnlineSub = IOnlineSubsystem::Get();
@@ -129,7 +145,7 @@ bool AOnlineGameSession::CreateSession(TSharedPtr<const FUniqueNetId> UserId, FN
 				OnlineSessionSettings->Set(SETTING_MAPNAME, MapName, EOnlineDataAdvertisementType::ViaOnlineService);
 				OnlineSessionSettings->Set(SETTING_MATCHING_HOPPER, FString("TeamDeathmatch"), EOnlineDataAdvertisementType::DontAdvertise);
 				OnlineSessionSettings->Set(SETTING_MATCHING_TIMEOUT, 120.0f, EOnlineDataAdvertisementType::ViaOnlineService);
-				OnlineSessionSettings->Set(SETTING_SESSION_TEMPLATE_NAME, FString("GameSession"), EOnlineDataAdvertisementType::DontAdvertise);
+				OnlineSessionSettings->Set(SETTING_SESSION_TEMPLATE_NAME, FString("Game"), EOnlineDataAdvertisementType::DontAdvertise);
 				OnlineSessionSettings->Set(SEARCH_KEYWORDS, FString("Custom"), EOnlineDataAdvertisementType::ViaOnlineService);
 
 				CreateSessionCompleteHandle = Session->AddOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegate);
@@ -161,10 +177,11 @@ void AOnlineGameSession::FindSessions(TSharedPtr<const FUniqueNetId> UserId, FNa
 			if (Session.IsValid())
 			{
 				OnlineSessionSearch = MakeShareable(new FOnlineSessionSearch());
+				OnlineSessionSearch->QuerySettings.Set(SEARCH_DEDICATED_ONLY, true, EOnlineComparisonOp::Equals);
+				OnlineSessionSearch->QuerySettings.Set(SEARCH_EMPTY_SERVERS_ONLY, true, EOnlineComparisonOp::Equals); 
 				OnlineSessionSearch->QuerySettings.Set(SEARCH_KEYWORDS, FString("Custom"), EOnlineComparisonOp::Equals);
-
+				
 				auto OnlineSessionSearchRef = OnlineSessionSearch.ToSharedRef();
-
 				FindSessionsCompleteHandle = Session->AddOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegate);
 
 				UE_LOG(LogUE4Online, Log, TEXT("FindSessions"));
