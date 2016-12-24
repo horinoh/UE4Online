@@ -128,10 +128,10 @@ bool AOnlineGameSession::CreateSession(TSharedPtr<const FUniqueNetId> UserId, FN
 	const auto OnlineSub = IOnlineSubsystem::Get();
 	if (nullptr != OnlineSub)
 	{
+		SessionParams.UserId = UserId;
 		SessionParams.SessionName = InSessionName;
 		SessionParams.bIsLAN = bIsLAN;
 		SessionParams.bIsPresence = bIsPresence;
-		SessionParams.UserId = UserId;
 
 		MaxPlayers = MaxNumPlayers;
 
@@ -141,6 +141,17 @@ bool AOnlineGameSession::CreateSession(TSharedPtr<const FUniqueNetId> UserId, FN
 			if (Session.IsValid())
 			{
 				OnlineSessionSettings = MakeShareable(new FOnlineSessionSettings());
+
+				OnlineSessionSettings->bIsLANMatch = bIsLAN;
+				OnlineSessionSettings->bUsesPresence = bIsPresence;
+				OnlineSessionSettings->NumPublicConnections = MaxPlayers;
+				OnlineSessionSettings->NumPrivateConnections = 0;
+				OnlineSessionSettings->bAllowInvites = true;
+				OnlineSessionSettings->bAllowJoinInProgress = true;
+				OnlineSessionSettings->bAllowJoinViaPresence = true;
+				OnlineSessionSettings->bAllowJoinViaPresenceFriendsOnly = false;
+				OnlineSessionSettings->bShouldAdvertise = true;
+
 				OnlineSessionSettings->Set(SETTING_GAMEMODE, GameType, EOnlineDataAdvertisementType::ViaOnlineService);
 				OnlineSessionSettings->Set(SETTING_MAPNAME, MapName, EOnlineDataAdvertisementType::ViaOnlineService);
 				OnlineSessionSettings->Set(SETTING_MATCHING_HOPPER, FString("TeamDeathmatch"), EOnlineDataAdvertisementType::DontAdvertise);
