@@ -19,7 +19,7 @@ void AOnlineGameSession::OnCreateSessionComplete(FName InSessionName, bool bWasS
 	UE_LOG(LogUE4Online, Log, TEXT("OnCreateSessionComplete"));
 	if (bWasSuccessful)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, TEXT("OnCreateSessionComplete : ") + InSessionName.ToString());
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, TEXT("OnCreateSessionComplete"));
 	}
 
 	const auto OnlineSub = IOnlineSubsystem::Get();
@@ -44,26 +44,28 @@ void AOnlineGameSession::OnFindSessionsComplete(bool bWasSuccessful)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("Not Found"));
 		}
-		for (const auto& i : OnlineSessionSearch->SearchResults)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, i.Session.GetSessionIdStr());
-		}
+		//else
+		//{
+		//	for (const auto& i : OnlineSessionSearch->SearchResults)
+		//	{
+		//	}
+		//}
 
-		switch (OnlineSessionSearch->SearchState)
-		{
-		case EOnlineAsyncTaskState::InProgress:
-			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("InProgress"));
-			break;
-		case EOnlineAsyncTaskState::Done:
-			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("Done"));
-			break;
-		case EOnlineAsyncTaskState::Failed:
-			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("Failed"));
-			break;
-		case EOnlineAsyncTaskState::NotStarted:
-			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("NotStarted"));
-			break;
-		}
+		//switch (OnlineSessionSearch->SearchState)
+		//{
+		//case EOnlineAsyncTaskState::InProgress:
+		//	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("InProgress"));
+		//	break;
+		//case EOnlineAsyncTaskState::Done:
+		//	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("Done"));
+		//	break;
+		//case EOnlineAsyncTaskState::Failed:
+		//	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("Failed"));
+		//	break;
+		//case EOnlineAsyncTaskState::NotStarted:
+		//	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("NotStarted"));
+		//	break;
+		//}
 	}
 
 	const auto OnlineSub = IOnlineSubsystem::Get();
@@ -86,7 +88,7 @@ void AOnlineGameSession::OnFindSessionsComplete(bool bWasSuccessful)
 void AOnlineGameSession::OnJoinSessionComplete(FName InSessionName, EOnJoinSessionCompleteResult::Type Result)
 {
 	UE_LOG(LogUE4Online, Log, TEXT("OnJoinSessionComplete"));
-	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, TEXT("OnJoinSessionComplete : ") + InSessionName.ToString());
+	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, TEXT("OnJoinSessionComplete"));
 
 	const auto OnlineSub = IOnlineSubsystem::Get();
 	if (nullptr != OnlineSub)
@@ -105,7 +107,7 @@ void AOnlineGameSession::OnDestroySessionComplete(FName InSessionName, bool bWas
 	UE_LOG(LogUE4Online, Log, TEXT("OnDestroySessionComplete"));
 	if (bWasSuccessful)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, TEXT("OnDestroySessionComplete : ") + InSessionName.ToString());
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, TEXT("OnDestroySessionComplete"));
 	}
 
 	const auto OnlineSub = IOnlineSubsystem::Get();
@@ -162,7 +164,7 @@ bool AOnlineGameSession::CreateSession(TSharedPtr<const FUniqueNetId> UserId, FN
 				CreateSessionCompleteHandle = Session->AddOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegate);
 
 				UE_LOG(LogUE4Online, Log, TEXT("CreateSession"));
-				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("CreateSession : ") + SessionParams.SessionName.ToString());
+				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("CreateSession"));
 
 				return Session->CreateSession(*SessionParams.UserId, SessionParams.SessionName, *OnlineSessionSettings);
 			}
@@ -196,7 +198,7 @@ void AOnlineGameSession::FindSessions(TSharedPtr<const FUniqueNetId> UserId, FNa
 				FindSessionsCompleteHandle = Session->AddOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegate);
 
 				UE_LOG(LogUE4Online, Log, TEXT("FindSessions"));
-				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("FindSessions : ") + SessionParams.SessionName.ToString());
+				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("FindSessions"));
 
 				Session->FindSessions(*SessionParams.UserId, OnlineSessionSearchRef);
 			}
@@ -209,7 +211,7 @@ void AOnlineGameSession::FindSessions(TSharedPtr<const FUniqueNetId> UserId, FNa
 }
 bool AOnlineGameSession::JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName InSessionName, int32 SessionIndexInSearchResults)
 {
-	if (0 < SessionIndexInSearchResults && SessionIndexInSearchResults < OnlineSessionSearch->SearchResults.Num())
+	if (0 <= SessionIndexInSearchResults && SessionIndexInSearchResults < OnlineSessionSearch->SearchResults.Num())
 	{
 		JoinSession(UserId, InSessionName, OnlineSessionSearch->SearchResults[SessionIndexInSearchResults]);
 	}
@@ -228,7 +230,7 @@ bool AOnlineGameSession::JoinSession(TSharedPtr<const FUniqueNetId> UserId, FNam
 				JoinSessionCompleteHandle = Session->AddOnJoinSessionCompleteDelegate_Handle(OnJoinSessionCompleteDelegate);
 
 				UE_LOG(LogUE4Online, Log, TEXT("JoinSession"));
-				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("JoinSession : ") + InSessionName.ToString());
+				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("JoinSession"));
 
 				return Session->JoinSession(*UserId, InSessionName, SearchResult);
 			}
@@ -248,7 +250,7 @@ bool AOnlineGameSession::DestroySession(FName InSessionName)
 			DestroySessionCompleteHandle = Session->AddOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegate);
 
 			UE_LOG(LogUE4Online, Log, TEXT("DestroySession"));
-			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("DestroySession : ") + InSessionName.ToString());
+			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("DestroySession"));
 
 			return Session->DestroySession(InSessionName);
 		}

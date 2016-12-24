@@ -3,6 +3,7 @@
 #include "UE4Online.h"
 #include "OnlineGameInstance.h"
 
+#include "OnlineMenuGameMode.h"
 #include "OnlineGameSession.h"
 #include "OnlineMainMenu.h"
 
@@ -40,14 +41,17 @@ bool UOnlineGameInstance::JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIn
 	const auto World = GetWorld();
 	if (nullptr != World)
 	{
-		const auto GameMode = World->GetAuthGameMode();
-		const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
-		if (nullptr != Session)
+		const auto GameMode = Cast<AOnlineMenuGameMode>(World->GetAuthGameMode());
+		if (nullptr != GameMode)
 		{
-			OnJoinSessionCompleteDelegateHandle = Session->JoinSessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnJoinSessionComplete);
-			if (Session->JoinSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, SessionIndexInSearchResults))
+			const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
+			if (nullptr != Session)
 			{
-				return true;
+				OnJoinSessionCompleteDelegateHandle = Session->JoinSessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnJoinSessionComplete);
+				if (Session->JoinSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, SessionIndexInSearchResults))
+				{
+					return true;
+				}
 			}
 		}
 	}
@@ -59,14 +63,17 @@ bool UOnlineGameInstance::JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSe
 	const auto World = GetWorld();
 	if (nullptr != World)
 	{
-		const auto GameMode = World->GetAuthGameMode();
-		const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
-		if (nullptr != Session)
+		const auto GameMode = Cast<AOnlineMenuGameMode>(World->GetAuthGameMode());
+		if (nullptr != GameMode)
 		{
-			OnJoinSessionCompleteDelegateHandle = Session->JoinSessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnJoinSessionComplete);
-			if (Session->JoinSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, SearchResult))
+			const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
+			if (nullptr != Session)
 			{
-				return true;
+				OnJoinSessionCompleteDelegateHandle = Session->JoinSessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnJoinSessionComplete);
+				if (Session->JoinSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, SearchResult))
+				{
+					return true;
+				}
 			}
 		}
 	}

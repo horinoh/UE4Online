@@ -42,6 +42,6 @@ protected:
 
 	TArray<TSharedPtr<FServerEntry> > ServerList;
 
+	TSharedRef<class SOverlay> Overlay = SNew(SOverlay);
 	TSharedRef<class SCircularThrobber> CircularThrobber = SNew(SCircularThrobber);
-	EOnlineAsyncTaskState::Type PrevSearchState = EOnlineAsyncTaskState::NotStarted;
 };

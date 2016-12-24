@@ -29,8 +29,9 @@ Project Settings - General Settings - Game Viewport Client Class, を指定
   * 必要なら OnlineSubSystemUtils も追加
 * XXX.Target.cs のコンストラクタに bUsesSteam = true を追記
 * XXX.uproject に OnlineSubsytemSteam プラグインの項目を追加
+  * 一時的に OnlineSubsystemNull にしたい場合は `"Enabled": false` にする
 * スタンドアロンで起動する(PIEではダメ)
   * XXX.uproject 右クリック - Launch game または エディタから Standalone Game で起動する
-  * 右下に Steam のオーバーレイが表示されたら OK
+  * 右下に Steam のオーバーレイが表示されたら Steam が有効になっている
   
 * オンライン対応には 2PC、2Steam アカウントが必要

@@ -26,71 +26,38 @@ void SOnlineJoinSessionWidget::Tick(const FGeometry& AllottedGeometry, const dou
 				if (nullptr != GameSession)
 				{
 					const auto SearchState = GameSession->GetOnlineSessionSearch().Get()->SearchState;
-					if (PrevSearchState != SearchState)
+					switch (SearchState)
 					{
-						switch (SearchState)
+					case EOnlineAsyncTaskState::InProgress:
+						CircularThrobber->SetVisibility(EVisibility::Visible);
+						break;
+					case EOnlineAsyncTaskState::Done:
+						if (EVisibility::Hidden != CircularThrobber->GetVisibility())
 						{
-						case EOnlineAsyncTaskState::InProgress:
-							CircularThrobber->SetVisibility(EVisibility::Visible);
-							break; 
-						case EOnlineAsyncTaskState::Done:
-							CircularThrobber->SetVisibility(EVisibility::Hidden);
 							UpdateSearchStatus();
-							break;
-						default:
-						case EOnlineAsyncTaskState::Failed:
-						case EOnlineAsyncTaskState::NotStarted:
-							CircularThrobber->SetVisibility(EVisibility::Hidden);
-							break;
 						}
+						CircularThrobber->SetVisibility(EVisibility::Hidden);
+						break;
+					default:
+					case EOnlineAsyncTaskState::Failed:
+					case EOnlineAsyncTaskState::NotStarted:
+						CircularThrobber->SetVisibility(EVisibility::Hidden);
+						break;
 					}
-					PrevSearchState = SearchState;
 				}
 			}
 		}
-	}	
+	}
 }
 
 void SOnlineJoinSessionWidget::Construct(const FArguments& InArgs)
 {
 	LocalPlayer = InArgs._LocalPlayer;
 
-#if 0
-	//!< #MY_TODO テスト
-	ServerList.Add(MakeShareable(new FServerEntry({ "AAA", "1", "10", "0" })));
-	ServerList.Add(MakeShareable(new FServerEntry({ "BBB", "3", "8", "11" })));
-	ServerList.Add(MakeShareable(new FServerEntry({ "CCC", "1", "2", "21" })));
-	ServerList.Add(MakeShareable(new FServerEntry({ "DDD", "0", "32", "35" })));
-	ServerList.Add(MakeShareable(new FServerEntry({ "EEE", "7", "16", "47" })));
-	ServerList.Add(MakeShareable(new FServerEntry({ "FFF", "4", "256", "1" })));
-	ServerList.Add(MakeShareable(new FServerEntry({ "GGG", "3", "12", "2" })));
-	ServerList.Add(MakeShareable(new FServerEntry({ "HHH", "7", "64", "9" })));
-	ServerList.Add(MakeShareable(new FServerEntry({ "III", "2", "32", "10" })));
-	ServerList.Add(MakeShareable(new FServerEntry({ "JJJ", "1", "16", "44" })));
-	ServerList.Add(MakeShareable(new FServerEntry({ "KKK", "3", "48", "78" })));
-#endif
-
 	//!< タイトル
 	const auto TitleTextBlock = SNew(STextBlock)
 		.Text(LOCTEXT("JOIN_SESSION_TITLE_Key", "Join Session Menu"))
 		.ToolTipText(LOCTEXT("JOIN_SESSION_TITLE_TIP_Key", "Join Session Menu"));
-
-	//!< サーバリスト
-	const auto ServerListView = SNew(SListView<TSharedPtr<FServerEntry> >)
-		.ItemHeight(20)
-		.ListItemsSource(&ServerList)
-		.SelectionMode(ESelectionMode::Single)
-		.OnGenerateRow(this, &SOnlineJoinSessionWidget::OnServerEntryGenerateRow)
-		//.OnSelectionChanged(this, &SOnlineJoinSessionWidget::OnServerEntrySelectionChanged)
-		.OnMouseButtonDoubleClick(this, &SOnlineJoinSessionWidget::OnServerEntryMouseButtonDoubleClicked)
-		.HeaderRow(
-			SNew(SHeaderRow)
-			+ SHeaderRow::Column("ServerName").FixedWidth(100).DefaultLabel(LOCTEXT("ServerNameColumn", "Server Name"))
-			+ SHeaderRow::Column("GameType").DefaultLabel(LOCTEXT("GameTypeColumn", "Game Type"))
-			+ SHeaderRow::Column("Map").DefaultLabel(LOCTEXT("MapColumn", "Map"))
-			+ SHeaderRow::Column("PlayerCount").DefaultLabel(LOCTEXT("PlayerCountColumn", "Player Count"))
-			+ SHeaderRow::Column("PingInMs").DefaultLabel(LOCTEXT("PingInMsColumn", "PingInMs"))
-		);
 
 	//!< 円形スロバー
 	CircularThrobber->SetVisibility(EVisibility::Visible);
@@ -101,14 +68,7 @@ void SOnlineJoinSessionWidget::Construct(const FArguments& InArgs)
 		.ToolTipText(LOCTEXT("CANCEL_TIP_Key", "Cancel"))
 		.OnClicked(this, &SOnlineJoinSessionWidget::OnCancelButtonClicked);
 
-	//!< リストビューとローディング中は重ねて表示するので SOverlay へ含める
-	const auto Overlay = SNew(SOverlay);
-	Overlay->AddSlot()
-		.HAlign(HAlign_Center)
-		.VAlign(VAlign_Center)
-		[
-			ServerListView
-		];
+	//!< 円形スロバーとリストビューは重ねて表示するので SOverlay へ (リストビューはセッションファインド後に作成される)
 	Overlay->AddSlot()
 		.HAlign(HAlign_Center)
 		.VAlign(VAlign_Center)
@@ -201,17 +161,14 @@ TSharedRef<ITableRow> SOnlineJoinSessionWidget::OnServerEntryGenerateRow(TShared
 }
 void SOnlineJoinSessionWidget::OnServerEntryMouseButtonDoubleClicked(TSharedPtr<FServerEntry> InItem)
 {
-	if (EVisibility::Hidden == CircularThrobber->GetVisibility())
+	if (GEngine && GEngine->GameViewport)
 	{
-		if (GEngine && GEngine->GameViewport)
-		{
-			GEngine->GameViewport->RemoveAllViewportWidgets();
-		}
-		const auto GameInst = LocalPlayer->GetGameInstance();
-		if (nullptr != GameInst)
-		{
-			GameInst->JoinSession(LocalPlayer.Get(), InItem->Index);
-		}
+		GEngine->GameViewport->RemoveAllViewportWidgets();
+	}
+	const auto GameInst = Cast<UOnlineGameInstance>(LocalPlayer->GetGameInstance());
+	if (nullptr != GameInst)
+	{
+		GameInst->JoinSession(LocalPlayer.Get(), InItem->Index);
 	}
 }
 FReply SOnlineJoinSessionWidget::OnCancelButtonClicked()
@@ -261,8 +218,30 @@ void SOnlineJoinSessionWidget::UpdateSearchStatus()
 							const auto CurrentPalyerCount = MaxPlayerCount - AvailabePlayerCount;
 
 							auto ServerEntry = MakeShareable(new FServerEntry({ SearchResult.Session.OwningUserName, FString::FromInt(CurrentPalyerCount), FString::FromInt(MaxPlayerCount), FString::FromInt(SearchResult.PingInMs), i }));
-
 							ServerList.Add(ServerEntry);
+
+							//!< リストビューを作成
+							const auto ServerListView = SNew(SListView<TSharedPtr<FServerEntry>>)
+								.ItemHeight(20)
+								.ListItemsSource(&ServerList)
+								.SelectionMode(ESelectionMode::Single)
+								.OnGenerateRow(this, &SOnlineJoinSessionWidget::OnServerEntryGenerateRow)
+								//.OnSelectionChanged(this, &SOnlineJoinSessionWidget::OnServerEntrySelectionChanged)
+								.OnMouseButtonDoubleClick(this, &SOnlineJoinSessionWidget::OnServerEntryMouseButtonDoubleClicked)
+								.HeaderRow(
+									SNew(SHeaderRow)
+									+ SHeaderRow::Column("ServerName").FixedWidth(100).DefaultLabel(LOCTEXT("ServerNameColumn", "Server Name"))
+									+ SHeaderRow::Column("GameType").DefaultLabel(LOCTEXT("GameTypeColumn", "Game Type"))
+									+ SHeaderRow::Column("Map").DefaultLabel(LOCTEXT("MapColumn", "Map"))
+									+ SHeaderRow::Column("PlayerCount").DefaultLabel(LOCTEXT("PlayerCountColumn", "Player Count"))
+									+ SHeaderRow::Column("PingInMs").DefaultLabel(LOCTEXT("PingInMsColumn", "PingInMs"))
+								);
+							Overlay->AddSlot()
+								.HAlign(HAlign_Center)
+								.VAlign(VAlign_Center)
+								[
+									ServerListView
+								];
 						}
 					}
 				}
