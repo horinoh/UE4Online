@@ -35,3 +35,10 @@ Project Settings - General Settings - Game Viewport Client Class, を指定
   * 右下に Steam のオーバーレイが表示されたら Steam が有効になっている
   
 * オンライン対応には 2PC、2Steam アカウントが必要
+
+## 起動
+* 2PC で .uproject 右クリック - Launch Game で立ち上げる (1PCでやる場合は OnlineSubsystemNull にして２窓起動する)
+  * 一方を Create Session - OK
+  * もう一方を Find Session - OK
+    * セッションが見つかったらその行をダブルクリックする
+  * 抜ける場合は、コマンドライン(@)から　Exit で抜ける

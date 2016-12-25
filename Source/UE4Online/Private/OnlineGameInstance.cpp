@@ -3,7 +3,6 @@
 #include "UE4Online.h"
 #include "OnlineGameInstance.h"
 
-#include "OnlineMenuGameMode.h"
 #include "OnlineGameSession.h"
 #include "OnlineMainMenu.h"
 
@@ -12,7 +11,17 @@ void UOnlineGameInstance::Init()
 	Super::Init();
 
 	//!< #MY_TODO 各種コールバックの設定
+
+	TickDelegate = FTickerDelegate::CreateUObject(this, &UOnlineGameInstance::Tick);
+	TickDelegateHandle = FTicker::GetCoreTicker().AddTicker(TickDelegate);
 }
+void UOnlineGameInstance::Shutdown()
+{
+	Super::Shutdown();
+
+	FTicker::GetCoreTicker().RemoveTicker(TickDelegateHandle);
+}
+
 void UOnlineGameInstance::StartGameInstance()
 {
 	Super::StartGameInstance();
@@ -41,7 +50,7 @@ bool UOnlineGameInstance::JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIn
 	const auto World = GetWorld();
 	if (nullptr != World)
 	{
-		const auto GameMode = Cast<AOnlineMenuGameMode>(World->GetAuthGameMode());
+		const auto GameMode = World->GetAuthGameMode();
 		if (nullptr != GameMode)
 		{
 			const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
@@ -63,7 +72,7 @@ bool UOnlineGameInstance::JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSe
 	const auto World = GetWorld();
 	if (nullptr != World)
 	{
-		const auto GameMode = Cast<AOnlineMenuGameMode>(World->GetAuthGameMode());
+		const auto GameMode = World->GetAuthGameMode();
 		if (nullptr != GameMode)
 		{
 			const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
@@ -80,6 +89,28 @@ bool UOnlineGameInstance::JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSe
 
 	return false;
 }
+
+bool UOnlineGameInstance::Tick(float DeltaSeconds)
+{
+	if (IsRunningDedicatedServer())
+	{
+		return true;
+	}
+
+	const auto OnlineSub = IOnlineSubsystem::Get();
+	if (nullptr != OnlineSub)
+	{
+		const auto Session = OnlineSub->GetSessionInterface();
+		if (Session.IsValid())
+		{
+		 	const auto SessionState = Session->GetSessionState(GameSessionName);
+			const auto SessionStateString = EOnlineSessionState::ToString(SessionState);
+			//GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Cyan, SessionStateString);
+		}
+	}
+	return true;
+}
+
 void UOnlineGameInstance::OnCreateSessionComplete(FName Name, bool bWasSuccessful)
 {
 	const auto World = GetWorld();

@@ -4,10 +4,12 @@
 #include "OnlineArenaGameMode.h"
 
 #include "OnlineCharacter.h"
+#include "OnlineGameState.h"
 
 AOnlineArenaGameMode::AOnlineArenaGameMode()
 {
 	DefaultPawnClass = AOnlineCharacter::StaticClass();
+	GameStateClass = AOnlineGameState::StaticClass();
 }
 
 void AOnlineArenaGameMode::PreInitializeComponents()
@@ -16,6 +18,17 @@ void AOnlineArenaGameMode::PreInitializeComponents()
 
 	FTimerHandle TimerHandle_DefaultTimer;
 	GetWorldTimerManager().SetTimer(TimerHandle_DefaultTimer, this, &AOnlineArenaGameMode::DefaultTimer, GetWorldSettings()->GetEffectiveTimeDilation(), true);
+}
+
+void AOnlineArenaGameMode::HandleMatchHasStarted()
+{
+	Super::HandleMatchHasStarted();
+
+	const auto GS = Cast<AOnlineGameState>(GameState);
+	if (nullptr != GS)
+	{
+		GS->RemainingTime = 30;
+	}
 }
 
 void AOnlineArenaGameMode::DefaultTimer()
@@ -33,23 +46,29 @@ void AOnlineArenaGameMode::DefaultTimer()
 	{
 		const auto MatchSteate = GetMatchState();
 
-		//!< #MY_TODO タイムアップの処理
-		if (false)
+		const auto GS = Cast<AOnlineGameState>(GameState);
+		if (nullptr != GS)
 		{
-			if (MatchState::WaitingPostMatch == MatchState)
+			--GS->RemainingTime;
+			if (GS->RemainingTime <= 0)
 			{
-				RestartGame();
+				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("TIME UP"));
+				if (MatchState::WaitingPostMatch == MatchState)
+				{
+					RestartGame();
+				}
+				else if (MatchState::InProgress == MatchState)
+				{
+					EndMatch();
+				}
 			}
-			else if (MatchState::InProgress == MatchState)
+			else
 			{
-				EndMatch();
-			}
-		}
-		else
-		{
-			if (MatchState::WaitingToStart == MatchState)
-			{
-				StartMatch();
+				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::FromInt(GS->RemainingTime));
+				if (MatchState::WaitingToStart == MatchState)
+				{
+					StartMatch();
+				}
 			}
 		}
 	}

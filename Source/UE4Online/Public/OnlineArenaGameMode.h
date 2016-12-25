@@ -18,6 +18,7 @@ public:
 
 	//!< AActor
 	virtual void PreInitializeComponents() override;
+	virtual void HandleMatchHasStarted() override;
 
 	virtual void DefaultTimer();
 };

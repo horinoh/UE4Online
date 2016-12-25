@@ -18,10 +18,13 @@ class UE4ONLINE_API UOnlineGameInstance : public UGameInstance
 public:
 	//!< UGameInstance
 	virtual void Init() override;
+	virtual void Shutdown() override;
 	virtual void StartGameInstance() override;
 	virtual bool StartPIEGameInstance(ULocalPlayer* LocalPlayer, bool bInSimulateInEditor, bool bAnyBlueprintErrors, bool bStartInSpectatorMode) override;
 	virtual bool JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults) override;
 	virtual bool JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSessionSearchResult& SearchResult) override;
+
+	bool Tick(float DeltaSeconds);
 
 	void OnCreateSessionComplete(FName Name, bool bWasSuccessful);
 	void OnFindSessionsComplete(bool bWasSuccessful);
@@ -36,6 +39,9 @@ public:
 	TSharedPtr<class FOnlineMainMenu> GetMainMenu() const { return MainMenu; }
 
 protected:
+	FTickerDelegate TickDelegate;
+	FDelegateHandle TickDelegateHandle;
+	
 	FDelegateHandle OnCreateSessionCompleteDelegateHandle;
 	FDelegateHandle OnFindSessionsCompleteDelegateHandle;
 	FDelegateHandle OnJoinSessionCompleteDelegateHandle;
