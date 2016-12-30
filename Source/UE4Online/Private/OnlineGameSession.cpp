@@ -51,21 +51,21 @@ void AOnlineGameSession::OnFindSessionsComplete(bool bWasSuccessful)
 		//	}
 		//}
 
-		//switch (OnlineSessionSearch->SearchState)
-		//{
-		//case EOnlineAsyncTaskState::InProgress:
-		//	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("InProgress"));
-		//	break;
-		//case EOnlineAsyncTaskState::Done:
-		//	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("Done"));
-		//	break;
-		//case EOnlineAsyncTaskState::Failed:
-		//	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("Failed"));
-		//	break;
-		//case EOnlineAsyncTaskState::NotStarted:
-		//	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("NotStarted"));
-		//	break;
-		//}
+		switch (OnlineSessionSearch->SearchState)
+		{
+		case EOnlineAsyncTaskState::InProgress:
+			//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("InProgress"));
+			break;
+		case EOnlineAsyncTaskState::Done:
+			//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("Done"));
+			break;
+		case EOnlineAsyncTaskState::Failed:
+			//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, TEXT("Failed"));
+			break;
+		case EOnlineAsyncTaskState::NotStarted:
+			//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, TEXT("NotStarted"));
+			break;
+		}
 	}
 
 	const auto OnlineSub = IOnlineSubsystem::Get();
@@ -190,10 +190,11 @@ void AOnlineGameSession::FindSessions(TSharedPtr<const FUniqueNetId> UserId, FNa
 			if (Session.IsValid())
 			{
 				OnlineSessionSearch = MakeShareable(new FOnlineSessionSearch());
-				OnlineSessionSearch->QuerySettings.Set(SEARCH_DEDICATED_ONLY, true, EOnlineComparisonOp::Equals);
-				OnlineSessionSearch->QuerySettings.Set(SEARCH_EMPTY_SERVERS_ONLY, true, EOnlineComparisonOp::Equals); 
+				//OnlineSessionSearch->QuerySettings.Set(SEARCH_DEDICATED_ONLY, true, EOnlineComparisonOp::Equals);
+				//OnlineSessionSearch->QuerySettings.Set(SEARCH_EMPTY_SERVERS_ONLY, true, EOnlineComparisonOp::Equals); 
 				OnlineSessionSearch->QuerySettings.Set(SEARCH_KEYWORDS, FString("Custom"), EOnlineComparisonOp::Equals);
-				
+				OnlineSessionSearch->MaxSearchResults = 5000;
+
 				auto OnlineSessionSearchRef = OnlineSessionSearch.ToSharedRef();
 				FindSessionsCompleteHandle = Session->AddOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegate);
 
