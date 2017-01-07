@@ -27,15 +27,17 @@ void SOnlineCreateSessionWidget::Construct(const FArguments& InArgs)
 	const auto DecreaseButton = SNew(SButton)
 		.Text(LOCTEXT("DECREASE_Key", "<"))
 		.ToolTipText(LOCTEXT("DECREASE_TIP_Key", "Decrease"))
-		.OnClicked(this, &SOnlineCreateSessionWidget::OnDecreasePlayerCountButtonClicked);
-	const auto PlayerCountTextBox = SNew(SEditableTextBox)
+		.OnClicked(this, &SOnlineCreateSessionWidget::OnDecreasePlayerCountButtonClicked)
+		.OnPressed(this, &SOnlineCreateSessionWidget::OnDecreasePlayerCountButtonPressed);
+		const auto PlayerCountTextBox = SNew(SEditableTextBox)
 		.Text(this, &SOnlineCreateSessionWidget::GetPlayerCountText)
 		.ToolTipText(LOCTEXT("PLAYERNUM_TIP_Key", "Player Num"))
 		.OnTextChanged(this, &SOnlineCreateSessionWidget::OnPlayerCountTextChanged);
 	const auto IncreaseButton = SNew(SButton)
 		.Text(LOCTEXT("Increase_Key", ">"))
 		.ToolTipText(LOCTEXT("INCREASE_TIP_Key", "Increase"))
-		.OnClicked(this, &SOnlineCreateSessionWidget::OnIncreasePlayerCountButtonClicked);
+		.OnClicked(this, &SOnlineCreateSessionWidget::OnIncreasePlayerCountButtonClicked)
+		.OnPressed(this, &SOnlineCreateSessionWidget::OnIncreasePlayerCountButtonPressed);
 	const auto PlayerCountHBox = SNew(SHorizontalBox) + SHorizontalBox::Slot();
 	PlayerCountHBox->AddSlot()
 		.HAlign(HAlign_Left)
@@ -70,12 +72,14 @@ void SOnlineCreateSessionWidget::Construct(const FArguments& InArgs)
 	const auto CancelButton = SNew(SButton)
 		.Text(LOCTEXT("CANCEL_Key", "Cancel"))
 		.ToolTipText(LOCTEXT("CANCEL_TIP_Key", "Cancel"))
-		.OnClicked(this, &SOnlineCreateSessionWidget::OnCancelButtonClicked);
+		.OnClicked(this, &SOnlineCreateSessionWidget::OnCancelButtonClicked)
+		.OnPressed(this, &SOnlineCreateSessionWidget::OnCancelButtonPressed);
 	const auto OKButton = SNew(SButton)
 		.Text(LOCTEXT("OK_Key", "OK"))
 		.ToolTipText(LOCTEXT("OK_TIP_Key", "OK"))
-		.OnClicked(this, &SOnlineCreateSessionWidget::OnOKButtonClicked);
-	const auto OKCancelHBox = SNew(SHorizontalBox) + SHorizontalBox::Slot();
+		.OnClicked(this, &SOnlineCreateSessionWidget::OnOKButtonClicked)
+		.OnPressed(this, &SOnlineCreateSessionWidget::OnOKButtonPressed);
+		const auto OKCancelHBox = SNew(SHorizontalBox) + SHorizontalBox::Slot();
 	OKCancelHBox->AddSlot()
 		.HAlign(HAlign_Left)
 		.AutoWidth()
@@ -181,6 +185,7 @@ FReply SOnlineCreateSessionWidget::OnOKButtonClicked()
 	if (GEngine && GEngine->GameViewport)
 	{
 		GEngine->GameViewport->RemoveAllViewportWidgets();
+		FSlateApplication::Get().SetUserFocusToGameViewport(FSlateApplication::Get().GetUserIndexForKeyboard());
 	}
 	
 	const auto GameInst = Cast<UOnlineGameInstance>(LocalPlayer->GetGameInstance());
@@ -205,8 +210,13 @@ FReply SOnlineCreateSessionWidget::OnCancelButtonClicked()
 		if (nullptr != GEngine && nullptr != GEngine->GameViewport)
 		{
 			const auto MainMenu = GameInst->GetMainMenu();
+			const auto UserIndex = FSlateApplication::Get().GetUserIndexForKeyboard();
+
 			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->GetCreateSessionWidgetContainer().ToSharedRef());
+			FSlateApplication::Get().SetUserFocusToGameViewport(UserIndex);
+
 			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->GetMenuWidgetContainer().ToSharedRef());
+			FSlateApplication::Get().SetUserFocus(UserIndex, MainMenu->GetMenuWidgetContainer().ToSharedRef());
 		}
 	}
 

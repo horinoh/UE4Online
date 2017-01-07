@@ -66,7 +66,8 @@ void SOnlineJoinSessionWidget::Construct(const FArguments& InArgs)
 	const auto CancelButton = SNew(SButton)
 		.Text(LOCTEXT("CANCEL_Key", "Cancel"))
 		.ToolTipText(LOCTEXT("CANCEL_TIP_Key", "Cancel"))
-		.OnClicked(this, &SOnlineJoinSessionWidget::OnCancelButtonClicked);
+		.OnClicked(this, &SOnlineJoinSessionWidget::OnCancelButtonClicked)
+		.OnPressed(this, &SOnlineJoinSessionWidget::OnCancelButtonPressed);
 
 	//!< 円形スロバーとリストビューは重ねて表示するので SOverlay へ (リストビューはセッションファインド後に作成される)
 	Overlay->AddSlot()
@@ -164,6 +165,7 @@ void SOnlineJoinSessionWidget::OnServerEntryMouseButtonDoubleClicked(TSharedPtr<
 	if (GEngine && GEngine->GameViewport)
 	{
 		GEngine->GameViewport->RemoveAllViewportWidgets();
+		FSlateApplication::Get().SetUserFocusToGameViewport(FSlateApplication::Get().GetUserIndexForKeyboard());
 	}
 	const auto GameInst = Cast<UOnlineGameInstance>(LocalPlayer->GetGameInstance());
 	if (nullptr != GameInst)
@@ -181,8 +183,13 @@ FReply SOnlineJoinSessionWidget::OnCancelButtonClicked()
 			if (nullptr != GEngine && nullptr != GEngine->GameViewport)
 			{
 				const auto MainMenu = GameInst->GetMainMenu();
+				const auto UserIndex = FSlateApplication::Get().GetUserIndexForKeyboard();
+
 				GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->GetJoinSessionWidgetContainer().ToSharedRef());
+				FSlateApplication::Get().SetUserFocusToGameViewport(UserIndex);
+
 				GEngine->GameViewport->AddViewportWidgetContent(MainMenu->GetFindSessionWidgetContainer().ToSharedRef());
+				FSlateApplication::Get().SetUserFocus(UserIndex, MainMenu->GetFindSessionWidgetContainer().ToSharedRef());
 			}
 		}
 	}
@@ -236,6 +243,7 @@ void SOnlineJoinSessionWidget::UpdateSearchStatus()
 									+ SHeaderRow::Column("PlayerCount").DefaultLabel(LOCTEXT("PlayerCountColumn", "Player Count"))
 									+ SHeaderRow::Column("PingInMs").DefaultLabel(LOCTEXT("PingInMsColumn", "PingInMs"))
 								);
+
 							Overlay->AddSlot()
 								.HAlign(HAlign_Center)
 								.VAlign(VAlign_Center)

@@ -22,19 +22,22 @@ void SOnlineMenuWidget::Construct(const FArguments& InArgs)
 	const auto CreateButton = SNew(SButton)
 		.Text(LOCTEXT("CREATE_SESSION_Key", "Create Session"))
 		.ToolTipText(LOCTEXT("CREATE_SESSION_TIP_Key", "Create Session"))
-		.OnClicked(this, &SOnlineMenuWidget::OnCreateSessionButtonClicked);
+		.OnClicked(this, &SOnlineMenuWidget::OnCreateSessionButtonClicked)
+		.OnPressed(this, &SOnlineMenuWidget::OnCreateSessionButtonPressed);
 
 	//!< セッション検索
 	const auto FindButton = SNew(SButton)
 		.Text(LOCTEXT("FIND_SESSION_Key", "Find Session"))
 		.ToolTipText(LOCTEXT("FIND_SESSION_TIP_Key", "Find Session"))
-		.OnClicked(this, &SOnlineMenuWidget::OnFindSessionButtonClicked);
+		.OnClicked(this, &SOnlineMenuWidget::OnFindSessionButtonClicked)
+		.OnPressed(this, &SOnlineMenuWidget::OnFindSessionButtonPressed);
 
 	//!< 終了
 	const auto QuitButton = SNew(SButton)
 		.Text(LOCTEXT("QUIT_Key", "Quit"))
 		.ToolTipText(LOCTEXT("QUIT_TIP_Key", "Quit"))
-		.OnClicked(this, &SOnlineMenuWidget::OnQuitButtonClicked);
+		.OnClicked(this, &SOnlineMenuWidget::OnQuitButtonClicked)
+		.OnPressed(this, &SOnlineMenuWidget::OnQuitButtonPressed);
 
 	const auto VBox = SNew(SVerticalBox) + SVerticalBox::Slot();
 	VBox->AddSlot()
@@ -95,8 +98,13 @@ FReply SOnlineMenuWidget::OnCreateSessionButtonClicked()
 		if (nullptr != GEngine && nullptr != GEngine->GameViewport)
 		{
 			const auto MainMenu = GameInst->GetMainMenu();
+			const auto UserIndex = FSlateApplication::Get().GetUserIndexForKeyboard();
+
 			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->GetMenuWidgetContainer().ToSharedRef());
+			FSlateApplication::Get().SetUserFocusToGameViewport(UserIndex);
+
 			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->GetCreateSessionWidgetContainer().ToSharedRef());
+			FSlateApplication::Get().SetUserFocus(UserIndex, MainMenu->GetCreateSessionWidgetContainer().ToSharedRef());
 		}
 	}
 
@@ -110,8 +118,13 @@ FReply SOnlineMenuWidget::OnFindSessionButtonClicked()
 		if (nullptr != GEngine && nullptr != GEngine->GameViewport)
 		{
 			const auto MainMenu = GameInst->GetMainMenu();
+			const auto UserIndex = FSlateApplication::Get().GetUserIndexForKeyboard();
+
 			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->GetMenuWidgetContainer().ToSharedRef());
+			FSlateApplication::Get().SetUserFocusToGameViewport(UserIndex);
+
 			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->GetFindSessionWidgetContainer().ToSharedRef());
+			FSlateApplication::Get().SetUserFocus(UserIndex, MainMenu->GetFindSessionWidgetContainer().ToSharedRef());
 		}
 	}
 
@@ -122,6 +135,7 @@ FReply SOnlineMenuWidget::OnQuitButtonClicked()
 	if (GEngine && GEngine->GameViewport)
 	{
 		GEngine->GameViewport->RemoveAllViewportWidgets();
+		FSlateApplication::Get().SetUserFocusToGameViewport(FSlateApplication::Get().GetUserIndexForKeyboard());
 	}
 
 	//!< #MY_TODO

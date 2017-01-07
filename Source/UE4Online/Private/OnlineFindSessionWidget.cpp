@@ -31,11 +31,13 @@ void SOnlineFindSessionWidget::Construct(const FArguments& InArgs)
 	const auto CancelButton = SNew(SButton)
 		.Text(LOCTEXT("CANCEL_Key", "Cancel"))
 		.ToolTipText(LOCTEXT("CANCEL_TIP_Key", "Cancel"))
-		.OnClicked(this, &SOnlineFindSessionWidget::OnCancelButtonClicked);
+		.OnClicked(this, &SOnlineFindSessionWidget::OnCancelButtonClicked)
+		.OnPressed(this, &SOnlineFindSessionWidget::OnCancelButtonPressed);
 	const auto OKButton = SNew(SButton)
 		.Text(LOCTEXT("OK_Key", "OK"))
 		.ToolTipText(LOCTEXT("OK_TIP_Key", "OK"))
-		.OnClicked(this, &SOnlineFindSessionWidget::OnOKButtonClicked);
+		.OnClicked(this, &SOnlineFindSessionWidget::OnOKButtonClicked)
+		.OnPressed(this, &SOnlineFindSessionWidget::OnOKButtonPressed);
 	const auto OKCancelHBox = SNew(SHorizontalBox) + SHorizontalBox::Slot();
 	OKCancelHBox->AddSlot()
 		.HAlign(HAlign_Left)
@@ -105,8 +107,13 @@ FReply SOnlineFindSessionWidget::OnOKButtonClicked()
 		if (nullptr != GEngine && nullptr != GEngine->GameViewport)
 		{
 			const auto MainMenu = GameInst->GetMainMenu();
+			const auto UserIndex = FSlateApplication::Get().GetUserIndexForKeyboard();
+
 			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->GetFindSessionWidgetContainer().ToSharedRef());
+			FSlateApplication::Get().SetUserFocusToGameViewport(UserIndex);
+
 			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->GetJoinSessionWidgetContainer().ToSharedRef());
+			FSlateApplication::Get().SetUserFocus(UserIndex, MainMenu->GetJoinSessionWidgetContainer().ToSharedRef());
 		}
 
 		//!< セッション検索開始
@@ -123,8 +130,13 @@ FReply SOnlineFindSessionWidget::OnCancelButtonClicked()
 		if (nullptr != GEngine && nullptr != GEngine->GameViewport)
 		{
 			const auto MainMenu = GameInst->GetMainMenu();
+			const auto UserIndex = FSlateApplication::Get().GetUserIndexForKeyboard();
+
 			GEngine->GameViewport->RemoveViewportWidgetContent(MainMenu->GetFindSessionWidgetContainer().ToSharedRef());
+			FSlateApplication::Get().SetUserFocusToGameViewport(UserIndex);
+
 			GEngine->GameViewport->AddViewportWidgetContent(MainMenu->GetMenuWidgetContainer().ToSharedRef());
+			FSlateApplication::Get().SetUserFocus(UserIndex, MainMenu->GetMenuWidgetContainer().ToSharedRef());
 		}
 	}
 

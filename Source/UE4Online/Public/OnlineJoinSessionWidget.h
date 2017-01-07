@@ -18,8 +18,11 @@ public:
 	SLATE_END_ARGS()
 
 	//!< SWidget
+	virtual bool SupportsKeyboardFocus() const override { return true; }
+	virtual FReply OnFocusReceived(const FGeometry& MyGeometry, const FFocusEvent& InFocusEvent) override { return FReply::Handled().ReleaseMouseCapture(); }
+	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override { return FReply::Handled().SetUserFocus(SharedThis(this), EKeyboardFocusCause::SetDirectly); }
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
-
+	
 	void Construct(const FArguments& InArgs);
 
 	struct FServerEntry
@@ -34,6 +37,7 @@ public:
 	//void OnServerEntrySelectionChanged(TSharedPtr<FServerEntry> InItem, ESelectInfo::Type SelectInfo) {}
 	void OnServerEntryMouseButtonDoubleClicked(TSharedPtr<FServerEntry> InItem);
 	FReply OnCancelButtonClicked();
+	void OnCancelButtonPressed() { OnCancelButtonClicked(); }
 
 	void UpdateSearchStatus();
 
