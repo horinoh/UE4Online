@@ -32,7 +32,7 @@ public:
 	void OnDestroySessionComplete(FName Name, bool bWasSuccessful);
 
 	bool CreateSession(ULocalPlayer* LocalPlayer, const FString& InTravelURL);
-	bool CreateSession(ULocalPlayer* LocalPlayer, const FString& GameType, const FString& MapName, bool bIsLanMatch);
+	bool CreateSession(ULocalPlayer* LocalPlayer, const FString& GameType, const FString& MapName, bool bIsLanMatch, int32 MaxNumPlayers);
 	bool FindSessions(ULocalPlayer* PlayerOwner, bool bIsLanMatch);
 	bool DestroySession();
 

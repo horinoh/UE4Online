@@ -57,6 +57,7 @@ void SOnlineCreateSessionWidget::Construct(const FArguments& InArgs)
 		[
 			IncreaseButton
 		];
+	PlayerCountHBox->SetEnabled(false); //!< #MY_TODO 現状8固定
 
 	//!< LAN or インターネット
 	const auto IsLanCheckBox = SNew(SCheckBox)
@@ -195,6 +196,7 @@ FReply SOnlineCreateSessionWidget::OnOKButtonClicked()
 		const auto GameType = FString(TEXT("TDM"));		//!< #MY_TODO 現状固定
 		const auto IsOnline = FString(true ? TEXT("?listen") : TEXT(""));
 		const auto IsLanMatch = FString(bIsLanCheckBoxState ? TEXT("?bIsLanMatch") : TEXT(""));
+		const auto MaxNumPlayers = FString::FromInt(PlayerCount); //!< #MY_TODO 現状固定
 
 		const auto InTravelURL = FString::Printf(TEXT("/Game/Online/Map/%s?game=%s%s%s"), *MapName, *GameType, *IsOnline, *IsLanMatch);
 		GameInst->CreateSession(LocalPlayer.Get(), InTravelURL);

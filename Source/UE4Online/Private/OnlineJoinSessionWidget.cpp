@@ -105,7 +105,7 @@ void SOnlineJoinSessionWidget::Construct(const FArguments& InArgs)
 			.AutoHeight()
 			[
 				SNew(SBox)
-				.WidthOverride(300)
+				.WidthOverride(800)
 				.HeightOverride(300)
 				[
 					VBox
@@ -224,7 +224,14 @@ void SOnlineJoinSessionWidget::UpdateSearchStatus()
 							const auto AvailabePlayerCount = SearchResult.Session.NumOpenPublicConnections + SearchResult.Session.NumOpenPrivateConnections;
 							const auto CurrentPalyerCount = MaxPlayerCount - AvailabePlayerCount;
 
-							auto ServerEntry = MakeShareable(new FServerEntry({ SearchResult.Session.OwningUserName, FString::FromInt(CurrentPalyerCount), FString::FromInt(MaxPlayerCount), FString::FromInt(SearchResult.PingInMs), i }));
+							auto ServerEntry = MakeShareable(new FServerEntry({ 
+								//SearchResult.Session.OwningUserName,
+								SearchResult.GetSessionIdStr(),
+								FString::FromInt(CurrentPalyerCount),
+								FString::FromInt(MaxPlayerCount),
+								FString::FromInt(SearchResult.PingInMs),
+								i 
+							}));
 							ServerList.Add(ServerEntry);
 
 							//!< リストビューを作成
@@ -237,11 +244,11 @@ void SOnlineJoinSessionWidget::UpdateSearchStatus()
 								.OnMouseButtonDoubleClick(this, &SOnlineJoinSessionWidget::OnServerEntryMouseButtonDoubleClicked)
 								.HeaderRow(
 									SNew(SHeaderRow)
-									+ SHeaderRow::Column("ServerName").FixedWidth(100).DefaultLabel(LOCTEXT("ServerNameColumn", "Server Name"))
-									+ SHeaderRow::Column("GameType").DefaultLabel(LOCTEXT("GameTypeColumn", "Game Type"))
-									+ SHeaderRow::Column("Map").DefaultLabel(LOCTEXT("MapColumn", "Map"))
-									+ SHeaderRow::Column("PlayerCount").DefaultLabel(LOCTEXT("PlayerCountColumn", "Player Count"))
-									+ SHeaderRow::Column("PingInMs").DefaultLabel(LOCTEXT("PingInMsColumn", "PingInMs"))
+									+ SHeaderRow::Column("ServerName").FixedWidth(300).DefaultLabel(LOCTEXT("ServerNameColumn", "Server Name"))
+									+ SHeaderRow::Column("GameType").FixedWidth(100).DefaultLabel(LOCTEXT("GameTypeColumn", "Game Type"))
+									+ SHeaderRow::Column("Map").FixedWidth(100).DefaultLabel(LOCTEXT("MapColumn", "Map"))
+									+ SHeaderRow::Column("PlayerCount").FixedWidth(100).DefaultLabel(LOCTEXT("PlayerCountColumn", "Player Count"))
+									+ SHeaderRow::Column("PingInMs").FixedWidth(100).DefaultLabel(LOCTEXT("PingInMsColumn", "PingInMs"))
 								);
 
 							Overlay->AddSlot()

@@ -244,7 +244,7 @@ bool UOnlineGameInstance::CreateSession(ULocalPlayer* LocalPlayer, const FString
 
 	/**
 	TravelURL から MAPNAME、GAMETYPE、ISLAMMATCH を取得
-	URL の形式 : "/Game/Online/Map/[MAPNAME]?game=[GAMETYPE]?listen?[ISLANMATCH]"
+	URL の形式 : "/Game/Online/Map/MAPNAME?game=GAMETYPE?listen?bIsLanMatch"
 	*/
 	const FString& MapNameSubStr = "/Game/Online/Map/";
 
@@ -256,9 +256,11 @@ bool UOnlineGameInstance::CreateSession(ULocalPlayer* LocalPlayer, const FString
 
 	const auto bIsLanMatch = TravelURL.Contains(TEXT("?bIsLanMatch"));
 
-	return CreateSession(LocalPlayer, GameType, MapName, bIsLanMatch);
+	const auto MaxNumPlayers = 8; //!< #MY_TODO 
+
+	return CreateSession(LocalPlayer, GameType, MapName, bIsLanMatch, MaxNumPlayers);
 }
-bool UOnlineGameInstance::CreateSession(ULocalPlayer* LocalPlayer, const FString& GameType, const FString& MapName, bool bIsLanMatch)
+bool UOnlineGameInstance::CreateSession(ULocalPlayer* LocalPlayer, const FString& GameType, const FString& MapName, bool bIsLanMatch, int32 MaxNumPlayers)
 {
 	const auto World = GetWorld();
 	if (nullptr != World)
@@ -272,8 +274,7 @@ bool UOnlineGameInstance::CreateSession(ULocalPlayer* LocalPlayer, const FString
 				OnCreateSessionCompleteDelegateHandle = Session->CreateSessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnCreateSessionComplete);
 
 				const auto bIsPresence = true;
-				const auto NumPlayers = 8;
-				if (Session->CreateSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, GameType, MapName, bIsLanMatch, bIsPresence, NumPlayers))
+				if (Session->CreateSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, GameType, MapName, bIsLanMatch, bIsPresence, MaxNumPlayers))
 				{
 					return true;
 				}
