@@ -52,10 +52,10 @@ AOnlineCharacter::AOnlineCharacter(const FObjectInitializer& ObjectInitializer)
 		SkelMeshComp->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 
 		//!< アニメーションBP
-		static ConstructorHelpers::FObjectFinder<UAnimBlueprint> AnimBlueprint(TEXT("AnimBlueprint'/Game/AnimStarterPack/UE4ASP_HeroTPP_AnimBlueprint.UE4ASP_HeroTPP_AnimBlueprint'"));
-		if (AnimBlueprint.Object)
+		static ConstructorHelpers::FObjectFinder<UClass> AnimBPClass(TEXT("Class'/Game/AnimStarterPack/UE4ASP_HeroTPP_AnimBlueprint.UE4ASP_HeroTPP_AnimBlueprint_C'"));
+		if (AnimBPClass.Succeeded())
 		{
-			SkelMeshComp->SetAnimInstanceClass(AnimBlueprint.Object->GetAnimBlueprintGeneratedClass());
+			SkelMeshComp->SetAnimInstanceClass(AnimBPClass.Object);
 		}
 	}
 
