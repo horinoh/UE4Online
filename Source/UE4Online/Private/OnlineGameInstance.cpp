@@ -36,7 +36,21 @@ void UOnlineGameInstance::StartGameInstance()
 		FSlateApplication::Get().SetUserFocus(UserIndex, MainMenu->GetMenuWidgetContainer().ToSharedRef());
 	}
 }
-bool UOnlineGameInstance::StartPIEGameInstance(ULocalPlayer* LocalPlayer, bool bInSimulateInEditor, bool bAnyBlueprintErrors, bool bStartInSpectatorMode)
+//bool UOnlineGameInstance::StartPIEGameInstance(ULocalPlayer* LocalPlayer, bool bInSimulateInEditor, bool bAnyBlueprintErrors, bool bStartInSpectatorMode)
+//{
+//	MainMenu = MakeShareable(new FOnlineMainMenu());
+//	MainMenu->Construct(this, GetFirstGamePlayer());
+//	if (nullptr != GEngine && nullptr != GEngine->GameViewport)
+//	{
+//		const auto UserIndex = FSlateApplication::Get().GetUserIndexForKeyboard();
+//
+//		GEngine->GameViewport->AddViewportWidgetContent(MainMenu->GetMenuWidgetContainer().ToSharedRef());
+//		FSlateApplication::Get().SetUserFocus(UserIndex, MainMenu->GetMenuWidgetContainer().ToSharedRef());
+//	}
+//
+//	return Super::StartPIEGameInstance(LocalPlayer, bInSimulateInEditor, bAnyBlueprintErrors, bStartInSpectatorMode);
+//}
+FGameInstancePIEResult UOnlineGameInstance::StartPlayInEditorGameInstance(ULocalPlayer* LocalPlayer, const FGameInstancePIEParameters& Params)
 {
 	MainMenu = MakeShareable(new FOnlineMainMenu());
 	MainMenu->Construct(this, GetFirstGamePlayer());
@@ -48,7 +62,7 @@ bool UOnlineGameInstance::StartPIEGameInstance(ULocalPlayer* LocalPlayer, bool b
 		FSlateApplication::Get().SetUserFocus(UserIndex, MainMenu->GetMenuWidgetContainer().ToSharedRef());
 	}
 
-	return Super::StartPIEGameInstance(LocalPlayer, bInSimulateInEditor, bAnyBlueprintErrors, bStartInSpectatorMode);
+	return Super::StartPlayInEditorGameInstance(LocalPlayer, Params);
 }
 
 bool UOnlineGameInstance::JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults)
