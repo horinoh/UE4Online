@@ -5,23 +5,11 @@ using System.Collections.Generic;
 
 public class UE4OnlineTarget : TargetRules
 {
-	public UE4OnlineTarget(TargetInfo Target)
+	public UE4OnlineTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
 
-        bUsesSteam = true;
-    }
-
-	//
-	// TargetRules interface.
-	//
-
-	public override void SetupBinaries(
-		TargetInfo Target,
-		ref List<UEBuildBinaryConfiguration> OutBuildBinaryConfigurations,
-		ref List<string> OutExtraModuleNames
-		)
-	{
-		OutExtraModuleNames.AddRange( new string[] { "UE4Online" } );
+		ExtraModuleNames.Add("UE4Online");
+		bUsesSteam = true;
 	}
 }

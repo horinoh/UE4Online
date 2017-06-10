@@ -5,21 +5,10 @@ using System.Collections.Generic;
 
 public class UE4OnlineEditorTarget : TargetRules
 {
-	public UE4OnlineEditorTarget(TargetInfo Target)
+	public UE4OnlineEditorTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Editor;
-	}
 
-	//
-	// TargetRules interface.
-	//
-
-	public override void SetupBinaries(
-		TargetInfo Target,
-		ref List<UEBuildBinaryConfiguration> OutBuildBinaryConfigurations,
-		ref List<string> OutExtraModuleNames
-		)
-	{
-		OutExtraModuleNames.AddRange( new string[] { "UE4Online" } );
+		ExtraModuleNames.Add("UE4Online");
 	}
 }
