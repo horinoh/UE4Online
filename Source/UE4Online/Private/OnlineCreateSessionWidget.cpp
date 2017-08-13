@@ -12,18 +12,18 @@ void SOnlineCreateSessionWidget::Construct(const FArguments& InArgs)
 {
 	LocalPlayer = InArgs._LocalPlayer;
 
-	//!< タイトル
+	//!< Title
 	const auto TitleTextBlock = SNew(STextBlock)
 		.Text(LOCTEXT("CREATE_SESSION_TITLE_Key", "Create Session Menu"))
 		.ToolTipText(LOCTEXT("CREATE_SESSION_TITLE_TIP_Key", "Create Session Menu"));
 
-	//!< サーバ名
+	//!< ServerName
 	const auto ServerNameTextBox = SNew(SEditableTextBox)
 		.Text(this, &SOnlineCreateSessionWidget::GetServerNameText)
 		.ToolTipText(LOCTEXT("SERVER_NAME_TIP_Key", "Server Name"))
 		.OnTextChanged(this, &SOnlineCreateSessionWidget::OnServerNameTextChanged);
 
-	//!< プレイヤ数
+	//!< PlayerCount
 	const auto DecreaseButton = SNew(SButton)
 		.Text(LOCTEXT("DECREASE_Key", "<"))
 		.ToolTipText(LOCTEXT("DECREASE_TIP_Key", "Decrease"))
@@ -57,9 +57,9 @@ void SOnlineCreateSessionWidget::Construct(const FArguments& InArgs)
 		[
 			IncreaseButton
 		];
-	PlayerCountHBox->SetEnabled(false); //!< #MY_TODO 現状8固定
+	PlayerCountHBox->SetEnabled(false); //!< #MY_TODO
 
-	//!< LAN or インターネット
+	//!< LAN or Internet
 	const auto IsLanCheckBox = SNew(SCheckBox)
 		.IsChecked(this, &SOnlineCreateSessionWidget::IsLanCheckBoxChecked)
 		.OnCheckStateChanged(this, &SOnlineCreateSessionWidget::OnIsLanCheckBoxStateChanged)
@@ -192,11 +192,11 @@ FReply SOnlineCreateSessionWidget::OnOKButtonClicked()
 	const auto GameInst = Cast<UOnlineGameInstance>(LocalPlayer->GetGameInstance());
 	if (nullptr != GameInst)
 	{
-		const auto MapName = FString(TEXT("ArenaMap")); //!< #MY_TODO 現状固定
-		const auto GameType = FString(TEXT("TDM"));		//!< #MY_TODO 現状固定
+		const auto MapName = FString(TEXT("ArenaMap")); //!< #MY_TODO
+		const auto GameType = FString(TEXT("TDM"));		//!< #MY_TODO
 		const auto IsOnline = FString(true ? TEXT("?listen") : TEXT(""));
 		const auto IsLanMatch = FString(bIsLanCheckBoxState ? TEXT("?bIsLanMatch") : TEXT(""));
-		const auto MaxNumPlayers = FString::FromInt(PlayerCount); //!< #MY_TODO 現状固定
+		const auto MaxNumPlayers = FString::FromInt(PlayerCount); //!< #MY_TODO
 
 		const auto InTravelURL = FString::Printf(TEXT("/Game/Online/Map/%s?game=%s%s%s"), *MapName, *GameType, *IsOnline, *IsLanMatch);
 		GameInst->CreateSession(LocalPlayer.Get(), InTravelURL);
