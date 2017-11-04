@@ -11,7 +11,7 @@ AOnlineCharacter::AOnlineCharacter(const FObjectInitializer& ObjectInitializer)
 	const auto CapsuleComp = GetCapsuleComponent();
 	if (nullptr != CapsuleComp)
 	{
-		//!< カメラ
+		//!< Camera
 		SpringArmComp = ObjectInitializer.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("SpringArmComp"));
 		if (nullptr != SpringArmComp)
 		{
@@ -41,17 +41,17 @@ AOnlineCharacter::AOnlineCharacter(const FObjectInitializer& ObjectInitializer)
 		}
 		SkelMeshComp->SetRelativeLocationAndRotation(FVector::UpVector * -90.0f, FRotator(0.0f, -90.0f, 0.0f));
 
-		//!< AlwaysTickPose は描画されていないと更新されないので DedicateServer では更新されない、AlwaysTickPoseAndRefreshBones にすると描画されていなくても更新される
+		//!< If not drawn AlwaysTickPose not updated(== on dedicated server not updated). AlwaysTickPoseAndRefreshBones is updated even if not drawn
 		SkelMeshComp->MeshComponentUpdateFlag = EMeshComponentUpdateFlag::AlwaysTickPoseAndRefreshBones;
 
 		SkelMeshComp->bReceivesDecals = false;
 
-		//!< メッシュコリジョン
+		//!< Mesh Collision
 		SkelMeshComp->SetCollisionObjectType(ECC_Pawn);
 		SkelMeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		SkelMeshComp->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 
-		//!< アニメーションBP
+		//!< Animation BP
 		static ConstructorHelpers::FObjectFinder<UClass> AnimBPClass(TEXT("Class'/Game/AnimStarterPack/UE4ASP_HeroTPP_AnimBlueprint.UE4ASP_HeroTPP_AnimBlueprint_C'"));
 		if (AnimBPClass.Succeeded())
 		{
@@ -62,12 +62,10 @@ AOnlineCharacter::AOnlineCharacter(const FObjectInitializer& ObjectInitializer)
 	const auto MovementComp = GetCharacterMovement();
 	if (nullptr != MovementComp)
 	{
-		//!< カプセルを短くしても最下点を維持する (カプセルの中心を下げる)
-		//!< (普通に短くするとカプセルの最上下点が中心に寄ることになり浮くことになる)
+		//!< Even if shorten capsule, keep bottom point (lower capsule center)
 		MovementComp->bCrouchMaintainsBaseLocation = true;
 		MovementComp->bMaintainHorizontalGroundVelocity = false;
 
-		//!< デフォルト値が false なので true にしないとしゃがめない
 		MovementComp->GetNavAgentPropertiesRef().bCanCrouch = true;
 	}
 }

@@ -10,7 +10,7 @@ void UOnlineGameInstance::Init()
 {
 	Super::Init();
 
-	//!< #MY_TODO 各種コールバックの設定
+	//!< #MY_TODO callbacks
 
 	TickDelegate = FTickerDelegate::CreateUObject(this, &UOnlineGameInstance::Tick);
 	TickDelegateHandle = FTicker::GetCoreTicker().AddTicker(TickDelegate);
@@ -246,7 +246,7 @@ bool UOnlineGameInstance::CreateSession(ULocalPlayer* LocalPlayer, const FString
 {
 	TravelURL = InTravelURL;
 
-	//!< 非オンラインの場合は ServerTravel() で直接 InTravelURL へ
+	//!< If not online direct to ServerTravel(InTravelURL)
 	if (false)
 	{
 		const auto World = GetWorld();
@@ -256,10 +256,8 @@ bool UOnlineGameInstance::CreateSession(ULocalPlayer* LocalPlayer, const FString
 		}
 	}
 
-	/**
-	TravelURL から MAPNAME、GAMETYPE、ISLAMMATCH を取得
-	URL の形式 : "/Game/Online/Map/MAPNAME?game=GAMETYPE?listen?bIsLanMatch"
-	*/
+	//!< Get MapName, GameType, IsLanMatch form TravelURL
+	//!< URL format : "/Game/Online/Map/MAPNAME?game=GAMETYPE?listen?bIsLanMatch"
 	const FString& MapNameSubStr = "/Game/Online/Map/";
 
 	const auto ChoppedMapName = TravelURL.RightChop(MapNameSubStr.Len());
@@ -295,8 +293,7 @@ bool UOnlineGameInstance::CreateSession(ULocalPlayer* LocalPlayer, const FString
 			}
 		}
 	}
-
-	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, (TEXT("CreateSession [%s] Failed"), GameSessionName.ToString()));
+	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, (TEXT("CreateSession [%s] Failed"), GameSessionName.ToString()));
 	return false;
 }
 bool UOnlineGameInstance::FindSessions(ULocalPlayer* PlayerOwner, bool bIsLanMatch)
@@ -336,7 +333,6 @@ bool UOnlineGameInstance::DestroySession()
 			const auto Session = Cast<AOnlineGameSession>(GameMode->GameSession);
 			if (nullptr != Session)
 			{
-				//!< DestroySession() が完了した時のデリゲートをイベントへ登録
 				OnDestroySessionCompleteDelegateHandle = Session->DestroySessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnDestroySessionComplete);
 
 				if (Session->DestroySession(GameSessionName))
