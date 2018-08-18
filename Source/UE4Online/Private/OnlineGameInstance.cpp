@@ -77,7 +77,7 @@ bool UOnlineGameInstance::JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIn
 			if (nullptr != Session)
 			{
 				OnJoinSessionCompleteDelegateHandle = Session->JoinSessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnJoinSessionComplete);
-				if (Session->JoinSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, SessionIndexInSearchResults))
+				if (Session->JoinSession(LocalPlayer->GetPreferredUniqueNetId().GetUniqueNetId(), GameSessionName, SessionIndexInSearchResults))
 				{
 					return true;
 				}
@@ -99,7 +99,7 @@ bool UOnlineGameInstance::JoinSession(ULocalPlayer* LocalPlayer, const FOnlineSe
 			if (nullptr != Session)
 			{
 				OnJoinSessionCompleteDelegateHandle = Session->JoinSessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnJoinSessionComplete);
-				if (Session->JoinSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, SearchResult))
+				if (Session->JoinSession(LocalPlayer->GetPreferredUniqueNetId().GetUniqueNetId(), GameSessionName, SearchResult))
 				{
 					return true;
 				}
@@ -286,7 +286,7 @@ bool UOnlineGameInstance::CreateSession(ULocalPlayer* LocalPlayer, const FString
 				OnCreateSessionCompleteDelegateHandle = Session->CreateSessionCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnCreateSessionComplete);
 
 				const auto bIsPresence = true;
-				if (Session->CreateSession(LocalPlayer->GetPreferredUniqueNetId(), GameSessionName, GameType, MapName, bIsLanMatch, bIsPresence, MaxNumPlayers))
+				if (Session->CreateSession(LocalPlayer->GetPreferredUniqueNetId().GetUniqueNetId(), GameSessionName, GameType, MapName, bIsLanMatch, bIsPresence, MaxNumPlayers))
 				{
 					return true;
 				}
@@ -312,7 +312,7 @@ bool UOnlineGameInstance::FindSessions(ULocalPlayer* PlayerOwner, bool bIsLanMat
 					Session->FindSessionsCompleteEvent.RemoveAll(this);
 					OnFindSessionsCompleteDelegateHandle = Session->FindSessionsCompleteEvent.AddUObject(this, &UOnlineGameInstance::OnFindSessionsComplete);
 
-					Session->FindSessions(PlayerOwner->GetPreferredUniqueNetId(), GameSessionName, bIsLanMatch, true);
+					Session->FindSessions(PlayerOwner->GetPreferredUniqueNetId().GetUniqueNetId(), GameSessionName, bIsLanMatch, true);
 					return true;
 				}
 			}
