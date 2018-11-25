@@ -42,7 +42,7 @@ AOnlineCharacter::AOnlineCharacter(const FObjectInitializer& ObjectInitializer)
 		SkelMeshComp->SetRelativeLocationAndRotation(FVector::UpVector * -90.0f, FRotator(0.0f, -90.0f, 0.0f));
 
 		//!< If not drawn AlwaysTickPose not updated(== on dedicated server not updated). AlwaysTickPoseAndRefreshBones is updated even if not drawn
-		SkelMeshComp->MeshComponentUpdateFlag = EMeshComponentUpdateFlag::AlwaysTickPoseAndRefreshBones;
+		SkelMeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 
 		SkelMeshComp->bReceivesDecals = false;
 
